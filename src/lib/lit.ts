@@ -5,22 +5,22 @@
  * until a specific timestamp is reached.
  */
 
-import * as LitJsSdk from '@lit-protocol/lit-node-client';
+import { LitNodeClient } from '@lit-protocol/lit-node-client';
+import { encryptString, decryptToString } from '@lit-protocol/encryption';
+import { LIT_NETWORK, LIT_ABILITY } from '@lit-protocol/constants';
+import { LitAccessControlConditionResource } from '@lit-protocol/auth-helpers';
 import { toBase64, fromBase64 } from './crypto';
 
-let litNodeClient: LitJsSdk.LitNodeClient | null = null;
-
-// Lit network to use
-const LIT_NETWORK = 'datil-dev'; // Use 'datil' for production
+let litNodeClient: LitNodeClient | null = null;
 
 /**
  * Initialize the Lit Protocol client
  */
-export async function initLit(): Promise<LitJsSdk.LitNodeClient> {
+export async function initLit(): Promise<LitNodeClient> {
   if (litNodeClient) return litNodeClient;
 
-  litNodeClient = new LitJsSdk.LitNodeClient({
-    litNetwork: LIT_NETWORK,
+  litNodeClient = new LitNodeClient({
+    litNetwork: LIT_NETWORK.DatilDev,
     debug: false,
   });
 
@@ -31,7 +31,7 @@ export async function initLit(): Promise<LitJsSdk.LitNodeClient> {
 /**
  * Get the current Lit client (throws if not initialized)
  */
-export function getLitClient(): LitJsSdk.LitNodeClient {
+export function getLitClient(): LitNodeClient {
   if (!litNodeClient) {
     throw new Error('Lit client not initialized. Call initLit() first.');
   }
@@ -48,14 +48,14 @@ function createTimeCondition(unlockTime: number) {
 
   return [
     {
-      conditionType: 'evmBasic',
+      conditionType: 'evmBasic' as const,
       contractAddress: '',
-      standardContractType: 'timestamp',
-      chain: 'ethereum',
+      standardContractType: 'timestamp' as const,
+      chain: 'ethereum' as const,
       method: '',
       parameters: [],
       returnValueTest: {
-        comparator: '>=',
+        comparator: '>=' as const,
         value: unlockTimeSeconds.toString(),
       },
     },
@@ -76,7 +76,7 @@ export async function encryptKeyWithTimelock(
   // Convert key to string for encryption
   const keyString = toBase64(symmetricKey);
 
-  const { ciphertext, dataToEncryptHash } = await LitJsSdk.encryptString(
+  const { ciphertext, dataToEncryptHash } = await encryptString(
     {
       accessControlConditions,
       dataToEncrypt: keyString,
@@ -108,13 +108,13 @@ export async function decryptKey(
     expiration: new Date(Date.now() + 1000 * 60 * 10).toISOString(), // 10 min
     resourceAbilityRequests: [
       {
-        resource: new LitJsSdk.LitAccessControlConditionResource('*'),
-        ability: LitJsSdk.LitAbility.AccessControlConditionDecryption,
+        resource: new LitAccessControlConditionResource('*'),
+        ability: LIT_ABILITY.AccessControlConditionDecryption,
       },
     ],
   });
 
-  const decryptedString = await LitJsSdk.decryptToString(
+  const decryptedString = await decryptToString(
     {
       accessControlConditions,
       ciphertext: encryptedKey,
@@ -144,4 +144,3 @@ export async function disconnectLit(): Promise<void> {
     litNodeClient = null;
   }
 }
-
