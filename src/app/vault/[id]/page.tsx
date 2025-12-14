@@ -174,7 +174,7 @@ export default function VaultPage() {
           />
           <div className="mt-6 pt-4 border-t border-zinc-800 text-center">
             <a
-              href={`https://ipfs.io/ipfs/${vault.cid}`}
+              href={`https://gateway.pinata.cloud/ipfs/${vault.cid}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
@@ -281,7 +281,7 @@ export default function VaultPage() {
         {vault && (
           <div className="mt-4 pt-4 border-t border-zinc-800 text-center">
             <a
-              href={`https://ipfs.io/ipfs/${vault.cid}`}
+              href={`https://gateway.pinata.cloud/ipfs/${vault.cid}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"

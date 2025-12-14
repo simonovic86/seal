@@ -157,7 +157,7 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
             Your encrypted data is stored publicly on IPFS. We keep nothing.
           </p>
           <a
-            href={`https://ipfs.io/ipfs/${createdVault.cid}`}
+            href={`https://gateway.pinata.cloud/ipfs/${createdVault.cid}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
