@@ -92,7 +92,10 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="max-w-lg mx-auto mt-16 text-center">
+      <footer className="max-w-lg mx-auto mt-16 text-center space-y-2">
+        <p className="text-xs text-zinc-500">
+          No server. No account. No way to cheat.
+        </p>
         <p className="text-xs text-zinc-600">
           Encrypted in browser · Time-locked by{' '}
           <a

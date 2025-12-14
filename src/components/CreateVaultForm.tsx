@@ -260,12 +260,12 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
             <p className="mt-1.5 text-xs text-zinc-600">
               {willUseIPFS ? (
                 hasPinataKey ? (
-                  'Will be stored on IPFS'
+                  'Stored on IPFS · No server'
                 ) : (
                   <span className="text-amber-500">Large content requires Pinata API key</span>
                 )
               ) : (
-                'Will be stored in shareable link'
+                'Stored in link · No server'
               )}
             </p>
           )}
