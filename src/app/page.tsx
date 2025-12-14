@@ -152,9 +152,20 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="max-w-lg mx-auto mt-16 text-center space-y-2">
+      <footer className="max-w-lg mx-auto mt-16 text-center space-y-3">
+        <p className="text-xs text-zinc-500">
+          No accounts. No servers. Your data lives on{' '}
+          <a href="https://ipfs.io" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200 underline">
+            IPFS
+          </a>
+          , time-locked by{' '}
+          <a href="https://litprotocol.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200 underline">
+            Lit Protocol
+          </a>
+          .
+        </p>
         <p className="text-xs text-zinc-600">
-          Powered by IPFS + Lit Protocol. Fully decentralized.
+          We keep nothing. Verify everything.
         </p>
       </footer>
     </main>

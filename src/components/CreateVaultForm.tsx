@@ -130,15 +130,8 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
           Your secret is locked until {unlockTime?.toLocaleString()}
         </p>
 
-        <div className="p-4 rounded-lg bg-zinc-800 mb-4 text-left">
-          <p className="text-xs text-zinc-500 mb-1">IPFS CID</p>
-          <code className="text-xs text-zinc-400 break-all">
-            {createdVault.cid}
-          </code>
-        </div>
-
         <div className="p-4 rounded-lg bg-zinc-800 mb-6 text-left">
-          <p className="text-xs text-zinc-500 mb-1">Vault Link</p>
+          <p className="text-xs text-zinc-500 mb-1">Shareable Link</p>
           <code className="text-sm text-violet-400 break-all">
             {getVaultUrl()}
           </code>
@@ -159,9 +152,22 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
           </button>
         </div>
 
-        <p className="mt-6 text-xs text-zinc-600">
-          Encrypted on IPFS, time-locked via Lit. Link works on any device.
-        </p>
+        <div className="mt-6 pt-4 border-t border-zinc-800">
+          <p className="text-xs text-zinc-500 mb-2">
+            Your encrypted data is stored publicly on IPFS. We keep nothing.
+          </p>
+          <a
+            href={`https://ipfs.io/ipfs/${createdVault.cid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            View encrypted data on IPFS
+          </a>
+        </div>
       </div>
       </>
     );
