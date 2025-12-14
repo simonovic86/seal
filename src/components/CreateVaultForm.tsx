@@ -174,59 +174,39 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
     return (
       <>
       {ToastComponent}
-      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center animate-fade-in">
-        <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-          <svg
-            className="w-8 h-8 text-emerald-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-        </div>
-        <h2 className="text-xl font-semibold text-zinc-100 mb-2">
-          Vault Created!
-        </h2>
-        <p className="text-sm text-zinc-400 mb-6">
-          Your secret is locked until {unlockTime?.toLocaleString()}
+      <div className="max-w-lg mx-auto p-6 rounded-xl bg-zinc-900 border border-zinc-800 text-center">
+        <p className="text-sm text-zinc-300 mb-1">Locked until</p>
+        <p className="text-lg text-zinc-100 mb-6">
+          {unlockTime?.toLocaleString()}
         </p>
 
-        <div className="p-4 rounded-lg bg-zinc-800 mb-6 text-left">
-          <p className="text-xs text-zinc-500 mb-1">Shareable Link</p>
-          <code className="text-sm text-violet-400 break-all">
+        <div className="p-3 rounded-lg bg-zinc-800 mb-4">
+          <code className="text-xs text-zinc-400 break-all">
             {getVaultUrl()}
           </code>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             onClick={handleCopy}
-            className="flex-1 py-3 rounded-lg font-medium bg-violet-600 text-white hover:bg-violet-500 transition-colors"
+            className="flex-1 py-2.5 rounded-lg font-medium bg-zinc-100 text-zinc-900 hover:bg-white transition-colors text-sm"
           >
             Copy Link
           </button>
           <button
             onClick={() => setShowQR(true)}
-            className="py-3 px-4 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
-            title="Show QR Code"
+            className="py-2.5 px-3 rounded-lg bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+            title="QR Code"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
+            QR
           </button>
         </div>
         
         <button
           onClick={handleReset}
-          className="w-full mt-3 py-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="mt-4 text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
         >
-          Done — Create Another
+          Create another
         </button>
 
         <QRCodeModal
@@ -234,53 +214,6 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
           isOpen={showQR}
           onClose={() => setShowQR(false)}
         />
-
-        {/* Verification badges */}
-        <div className="mt-6 pt-4 border-t border-zinc-800">
-          <div className="grid grid-cols-1 gap-2 text-left mb-4">
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-zinc-400">Encrypted in your browser</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              {createdVault.inlineData ? (
-                <span className="text-zinc-400">Stored in shareable link (no external service)</span>
-              ) : (
-                <>
-                  <span className="text-zinc-400">Stored on IPFS</span>
-                  <a
-                    href={`https://explore.ipld.io/#/explore/${createdVault.cid}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-violet-400 hover:text-violet-300 underline"
-                  >
-                    verify →
-                  </a>
-                </>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-zinc-400">Time-locked via Lit Protocol</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-zinc-400">Zero server storage</span>
-            </div>
-          </div>
-          <p className="text-xs text-zinc-600 text-center">
-            No early access — not for anyone, including us.
-          </p>
-        </div>
       </div>
       </>
     );
@@ -288,72 +221,18 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
 
   // Creating state
   if (step === 'creating') {
-    const getStepStatus = (stepId: string): 'pending' | 'active' | 'done' => {
-      const stepIndex = PROGRESS_STEPS.findIndex(s => s.id === stepId);
-      const currentIndex = PROGRESS_STEPS.findIndex(s => s.id === currentProgressStep);
-      if (stepIndex < currentIndex) return 'done';
-      if (stepIndex === currentIndex) return 'active';
-      return 'pending';
-    };
-
+    const currentStep = PROGRESS_STEPS.find(s => s.id === currentProgressStep);
+    
     return (
-      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 animate-fade-in">
-        <h2 className="text-xl font-semibold text-zinc-100 mb-6 text-center">
-          Creating Vault
-        </h2>
-        
-        <div className="space-y-3">
-          {PROGRESS_STEPS.map((progressStep) => {
-            const status = getStepStatus(progressStep.id);
-            return (
-              <div
-                key={progressStep.id}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                  status === 'active' 
-                    ? 'bg-violet-500/10 border border-violet-500/30' 
-                    : status === 'done'
-                    ? 'bg-zinc-800/50'
-                    : 'opacity-40'
-                }`}
-              >
-                {/* Status icon */}
-                <div className="flex-shrink-0">
-                  {status === 'done' ? (
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  ) : status === 'active' ? (
-                    <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <div className="w-5 h-5 rounded-full border border-zinc-600" />
-                  )}
-                </div>
-                
-                {/* Label and endpoint */}
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${
-                    status === 'active' ? 'text-zinc-100' : 
-                    status === 'done' ? 'text-zinc-400' : 'text-zinc-500'
-                  }`}>
-                    {progressStep.label}
-                  </p>
-                  {progressStep.endpoint && (
-                    <p className={`text-xs ${
-                      status === 'active' ? 'text-violet-400' : 'text-zinc-600'
-                    }`}>
-                      → {progressStep.endpoint}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <p className="text-xs text-zinc-500 text-center mt-6">
-          No data is sent to our servers
+      <div className="max-w-lg mx-auto p-8 rounded-xl bg-zinc-900 border border-zinc-800 text-center">
+        <div className="w-6 h-6 mx-auto mb-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-zinc-300">
+          {currentStep?.label || 'Creating vault...'}
+        </p>
+        <p className="text-xs text-zinc-600 mt-1">
+          {currentStep?.endpoint && currentStep.endpoint !== 'local' 
+            ? `→ ${currentStep.endpoint}` 
+            : 'Processing locally'}
         </p>
       </div>
     );
@@ -361,45 +240,26 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
 
   // Input form
   return (
-    <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800">
-      <h2 className="text-xl font-semibold text-zinc-100 mb-6">
-        Lock Your Secret
-      </h2>
-
-      <div className="space-y-6">
+    <div className="max-w-lg mx-auto p-6 rounded-xl bg-zinc-900 border border-zinc-800">
+      <div className="space-y-5">
         {/* Text input */}
-        <div>
-          <label className="block text-sm font-medium text-zinc-300 mb-2">
-            Secret message
-          </label>
-          <textarea
-            value={secretText}
-            onChange={(e) => setSecretText(e.target.value)}
-            placeholder="Enter your secret..."
-            rows={4}
-            className="
-              w-full px-4 py-3 rounded-lg resize-none
-              bg-zinc-800 border border-zinc-700
-              text-zinc-100 placeholder-zinc-500
-              focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
-            "
-          />
-        </div>
+        <textarea
+          value={secretText}
+          onChange={(e) => setSecretText(e.target.value)}
+          placeholder="Enter your secret..."
+          rows={4}
+          className="w-full px-4 py-3 rounded-lg resize-none bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 transition-colors"
+        />
 
         {/* Time selector */}
         <TimeSelector value={unlockTime} onChange={setUnlockTime} />
 
         {/* CAPTCHA */}
-        <div className="pt-2">
+        <div>
           <Turnstile
             onVerify={handleCaptchaVerify}
             onExpire={handleCaptchaExpire}
           />
-          {hasCaptcha && (
-            <p className="text-xs text-emerald-500 text-center mt-2">
-              ✓ Verified
-            </p>
-          )}
         </div>
 
         {/* Error */}
@@ -409,14 +269,9 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
         <button
           onClick={handleCreate}
           disabled={!canCreate}
-          className="
-            w-full py-3 rounded-lg font-medium
-            bg-violet-600 text-white
-            hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed
-            transition-colors
-          "
+          className="w-full py-3 rounded-lg font-medium bg-zinc-100 text-zinc-900 hover:bg-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
-          Lock Secret
+          Lock
         </button>
       </div>
     </div>

@@ -166,61 +166,33 @@ export default function VaultPage() {
     return (
       <main className="min-h-screen py-12 px-4">
         <div className="max-w-lg mx-auto mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
+          <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
+            ← Back
           </Link>
         </div>
-        <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800">
-          <h2 className="text-xl font-semibold text-zinc-100 mb-2 text-center">
-            Time-Locked Vault
-          </h2>
+        <div className="max-w-lg mx-auto p-6 rounded-xl bg-zinc-900 border border-zinc-800 text-center">
+          <p className="text-sm text-zinc-500 mb-4">Locked</p>
           <VaultCountdown
             unlockTime={vault.unlockTime}
             onUnlockReady={() => setState('ready')}
           />
           
-          {/* No early access notice */}
-          <div className="mt-6 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-            <p className="text-xs text-zinc-500 text-center">
-              No early access. No payment option. No support ticket.
-              <br />
-              <span className="text-zinc-400">Even we can&apos;t unlock it.</span>
-            </p>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-center gap-4">
+          <div className="mt-6 flex justify-center gap-4">
             <button
               onClick={() => setShowQR(true)}
-              className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-              </svg>
-              Share QR
+              Share
             </button>
             {vault.cid && !vault.inlineData && (
               <a
                 href={`https://explore.ipld.io/#/explore/${vault.cid}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
               >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                View on IPFS
+                Verify
               </a>
-            )}
-            {vault.inlineData && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-                Stored in link
-              </span>
             )}
           </div>
         </div>
@@ -238,37 +210,17 @@ export default function VaultPage() {
     return (
       <main className="min-h-screen py-12 px-4">
         <div className="max-w-lg mx-auto mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
+          <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
+            ← Back
           </Link>
         </div>
-        <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-zinc-100 mb-2">Ready to Unlock</h2>
-          <p className="text-sm text-zinc-400 mb-6">
-            This vault can now be opened. Click below to decrypt.
-          </p>
+        <div className="max-w-lg mx-auto p-6 rounded-xl bg-zinc-900 border border-zinc-800 text-center">
+          <p className="text-sm text-emerald-500 mb-6">Ready to unlock</p>
           <button
             onClick={handleUnlock}
-            className="w-full py-3 rounded-lg font-medium bg-emerald-600 text-white hover:bg-emerald-500 transition-colors animate-pulse-glow"
+            className="w-full py-3 rounded-lg font-medium bg-zinc-100 text-zinc-900 hover:bg-white transition-colors"
           >
-            Unlock Vault
-          </button>
-          <button
-            onClick={() => setShowQR(true)}
-            className="mt-3 w-full py-2 rounded-lg text-sm text-zinc-400 hover:text-zinc-200 transition-colors flex items-center justify-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-            </svg>
-            Share via QR
+            Unlock
           </button>
         </div>
         <QRCodeModal
@@ -284,9 +236,8 @@ export default function VaultPage() {
   if (state === 'unlocking') {
     return (
       <main className="min-h-screen py-12 px-4">
-        <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center">
-          <div className="animate-spin w-12 h-12 border-3 border-emerald-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-zinc-100 mb-2">Unlocking Vault</h2>
+        <div className="max-w-lg mx-auto p-8 rounded-xl bg-zinc-900 border border-zinc-800 text-center">
+          <div className="w-6 h-6 mx-auto mb-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-zinc-400">{progress}</p>
         </div>
       </main>
@@ -299,73 +250,46 @@ export default function VaultPage() {
     {ToastComponent}
     <main className="min-h-screen py-12 px-4">
       <div className="max-w-lg mx-auto mb-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Back
+        <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">
+          ← Back
         </Link>
       </div>
-      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-100">Vault Unlocked</h2>
-            <p className="text-xs text-zinc-500">Decrypted successfully</p>
-          </div>
+      <div className="max-w-lg mx-auto p-6 rounded-xl bg-zinc-900 border border-zinc-800">
+        <p className="text-xs text-zinc-500 mb-3">Your secret</p>
+        <div className="p-4 rounded-lg bg-zinc-800">
+          <p className="text-sm text-zinc-200 whitespace-pre-wrap break-words">{decryptedSecret}</p>
         </div>
-        <div className="p-4 rounded-lg bg-zinc-800 border border-zinc-700">
-          <p className="text-sm text-zinc-300 whitespace-pre-wrap break-words">{decryptedSecret}</p>
-        </div>
-        <div className="mt-6 flex gap-3">
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(decryptedSecret || '');
-              showToast('Secret copied!');
-            }}
-            className="flex-1 py-3 rounded-lg font-medium bg-violet-600 text-white hover:bg-violet-500 transition-colors"
-          >
-            Copy Secret
-          </button>
-          <Link href="/" className="flex-1 py-3 rounded-lg font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors text-center">
-            Create Vault
-          </Link>
-        </div>
-        {vault && vault.cid && !vault.inlineData && (
-          <div className="mt-4 pt-4 border-t border-zinc-800 text-center">
-            <a
-              href={`https://explore.ipld.io/#/explore/${vault.cid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-              View on IPFS
-            </a>
-          </div>
-        )}
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(decryptedSecret || '');
+            showToast('Copied');
+          }}
+          className="w-full mt-4 py-2.5 rounded-lg font-medium bg-zinc-100 text-zinc-900 hover:bg-white transition-colors text-sm"
+        >
+          Copy
+        </button>
+        <Link 
+          href="/" 
+          className="block mt-3 text-center text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+        >
+          Create another
+        </Link>
       </div>
       
-      {/* Powered by Lit Protocol badge */}
-      <a
-        href="https://litprotocol.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-8 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 hover:border-violet-500/40 transition-all group"
-      >
-        <svg className="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        <span className="text-xs font-medium bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent group-hover:from-violet-300 group-hover:to-fuchsia-300 transition-all">
-          Powered by Lit Protocol
-        </span>
-      </a>
+      {/* Footer */}
+      <footer className="max-w-lg mx-auto mt-12 text-center">
+        <p className="text-xs text-zinc-600">
+          Powered by{' '}
+          <a
+            href="https://litprotocol.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-500 hover:text-zinc-300 underline"
+          >
+            Lit Protocol
+          </a>
+        </p>
+      </footer>
     </main>
     </>
   );

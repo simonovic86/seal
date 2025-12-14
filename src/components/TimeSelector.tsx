@@ -39,17 +39,13 @@ export function TimeSelector({ value, onChange }: TimeSelectorProps) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-zinc-300">
-        Lock until
-      </label>
-
       <div className="flex flex-wrap gap-2">
         {PRESETS.map((preset) => (
           <button
             key={preset.label}
             type="button"
             onClick={() => handlePreset(preset.hours)}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+            className="px-3 py-1.5 rounded-lg text-sm text-zinc-400 hover:text-zinc-200 bg-zinc-800 hover:bg-zinc-700 transition-colors"
           >
             {preset.label}
           </button>
@@ -57,10 +53,9 @@ export function TimeSelector({ value, onChange }: TimeSelectorProps) {
         <button
           type="button"
           onClick={() => setShowCustom(true)}
-          className={`
-            px-4 py-2 rounded-lg text-sm font-medium transition-all
-            ${showCustom ? 'bg-violet-600 text-white' : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'}
-          `}
+          className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+            showCustom ? 'bg-zinc-700 text-zinc-200' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-800 hover:bg-zinc-700'
+          }`}
         >
           Custom
         </button>
@@ -71,18 +66,13 @@ export function TimeSelector({ value, onChange }: TimeSelectorProps) {
           type="datetime-local"
           min={minDateString}
           onChange={handleCustomChange}
-          className="
-            w-full px-4 py-2 rounded-lg
-            bg-zinc-800 border border-zinc-700
-            text-zinc-100 placeholder-zinc-500
-            focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
-          "
+          className="w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm focus:outline-none focus:border-zinc-500 transition-colors"
         />
       )}
 
       {value && (
-        <p className="text-sm text-zinc-400">
-          Unlocks: {value.toLocaleString()}
+        <p className="text-xs text-zinc-500">
+          Unlocks {value.toLocaleString()}
         </p>
       )}
     </div>
