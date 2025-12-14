@@ -9,7 +9,7 @@ import { Turnstile } from './Turnstile';
 import { generateKey, exportKey, encrypt } from '@/lib/crypto';
 import { initLit, encryptKeyWithTimelock } from '@/lib/lit';
 import { uploadToIPFS, shouldUseInlineStorage, toBase64 } from '@/lib/ipfs';
-import { saveVaultRef, VaultRef } from '@/lib/storage';
+import { saveVaultRef, VaultRef, INLINE_DATA_THRESHOLD } from '@/lib/storage';
 import { getShareableUrl } from '@/lib/share';
 import { getFriendlyError } from '@/lib/errors';
 
@@ -49,6 +49,11 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
   const hasContent = secretText.trim();
   const hasCaptcha = !!captchaToken;
   const canCreate = hasContent && unlockTime && hasCaptcha;
+
+  // Estimate storage mode (encrypted data is ~1.5x larger due to IV + base64)
+  const estimatedSize = new TextEncoder().encode(secretText).length * 1.5;
+  const willUseIPFS = estimatedSize > INLINE_DATA_THRESHOLD;
+  const hasPinataKey = !!process.env.NEXT_PUBLIC_PINATA_JWT;
 
   const handleCaptchaVerify = useCallback((token: string) => {
     setCaptchaToken(token);
@@ -243,13 +248,28 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
     <div className="max-w-lg mx-auto p-6 rounded-xl bg-zinc-900 border border-zinc-800">
       <div className="space-y-5">
         {/* Text input */}
-        <textarea
-          value={secretText}
-          onChange={(e) => setSecretText(e.target.value)}
-          placeholder="Enter your secret..."
-          rows={4}
-          className="w-full px-4 py-3 rounded-lg resize-none bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 transition-colors"
-        />
+        <div>
+          <textarea
+            value={secretText}
+            onChange={(e) => setSecretText(e.target.value)}
+            placeholder="Enter your secret..."
+            rows={4}
+            className="w-full px-4 py-3 rounded-lg resize-none bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 transition-colors"
+          />
+          {hasContent && (
+            <p className="mt-1.5 text-xs text-zinc-600">
+              {willUseIPFS ? (
+                hasPinataKey ? (
+                  'Will be stored on IPFS'
+                ) : (
+                  <span className="text-amber-500">Large content requires Pinata API key</span>
+                )
+              ) : (
+                'Will be stored in shareable link'
+              )}
+            </p>
+          )}
+        </div>
 
         {/* Time selector */}
         <TimeSelector value={unlockTime} onChange={setUnlockTime} />
