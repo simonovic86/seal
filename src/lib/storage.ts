@@ -7,13 +7,18 @@ import { get, set, del, keys } from 'idb-keyval';
 
 export interface VaultRef {
   id: string;
-  cid: string;
+  cid: string;           // IPFS CID (empty string if using inline data)
   unlockTime: number;
   litEncryptedKey: string;
   litKeyHash: string;
   createdAt: number;
   name?: string;
+  inlineData?: string;   // Base64 encrypted data (for small vaults, no IPFS needed)
 }
+
+// Threshold for inline storage (no IPFS upload)
+// Keep small to avoid URL length issues
+export const INLINE_DATA_THRESHOLD = 8 * 1024; // 8KB
 
 const VAULT_PREFIX = 'vault:';
 

@@ -9,15 +9,17 @@ import { VaultRef } from './storage';
 
 // Compact format to minimize URL length
 interface ShareableData {
-  c: string;  // cid
+  c: string;  // cid (empty string if using inline data)
   k: string;  // litEncryptedKey
   h: string;  // litKeyHash
   t: number;  // unlockTime
   n?: string; // name (optional)
+  d?: string; // inlineData (base64 encrypted data, for small vaults)
 }
 
 /**
  * Encode vault data for URL hash
+ * Supports both IPFS (CID) and inline data modes
  */
 export function encodeVaultForShare(vault: VaultRef): string {
   const data: ShareableData = {
@@ -29,6 +31,11 @@ export function encodeVaultForShare(vault: VaultRef): string {
 
   if (vault.name) {
     data.n = vault.name;
+  }
+
+  // Include inline data if present (for small vaults with no IPFS)
+  if (vault.inlineData) {
+    data.d = vault.inlineData;
   }
 
   // Use URL-safe base64
@@ -64,19 +71,25 @@ export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
     const json = atob(base64);
     const data: ShareableData = JSON.parse(json);
 
-    // Validate required fields
-    if (!data.c || !data.k || !data.h || !data.t) {
+    // Validate required fields (cid can be empty if inline data is present)
+    if (!data.k || !data.h || !data.t) {
+      return null;
+    }
+
+    // Must have either CID or inline data
+    if (!data.c && !data.d) {
       return null;
     }
 
     return {
       id,
-      cid: data.c,
+      cid: data.c || '',
       litEncryptedKey: data.k,
       litKeyHash: data.h,
       unlockTime: data.t,
       createdAt: 0, // Unknown for shared vaults
       name: data.n,
+      inlineData: data.d,
     };
   } catch (error) {
     console.error('Failed to decode vault from hash:', error);
@@ -105,7 +118,7 @@ export function hasVaultDataInHash(): boolean {
 // Compact format for backup bundle
 interface BackupBundle {
   v: 1; // version
-  vaults: Array<ShareableData & { id: string }>;
+  vaults: Array<ShareableData & { id: string; d?: string }>;
 }
 
 /**
@@ -121,6 +134,7 @@ export function encodeBackupUrl(vaults: VaultRef[]): string {
       h: vault.litKeyHash,
       t: vault.unlockTime,
       n: vault.name,
+      d: vault.inlineData,
     })),
   };
 
@@ -164,12 +178,13 @@ export function decodeBackupFromHash(hash: string): VaultRef[] | null {
 
     return bundle.vaults.map((data) => ({
       id: data.id,
-      cid: data.c,
+      cid: data.c || '',
       litEncryptedKey: data.k,
       litKeyHash: data.h,
       unlockTime: data.t,
       createdAt: Date.now(), // Set to now when restoring
       name: data.n,
+      inlineData: data.d,
     }));
   } catch (error) {
     console.error('Failed to decode backup:', error);

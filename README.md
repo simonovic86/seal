@@ -35,6 +35,7 @@ A fully decentralized app to lock secrets until a specific time. No accounts, no
 - **Backup/Restore** - Export all vaults to a single link, restore on any browser
 - **Verify on IPFS** - View your encrypted data on the public IPFS network
 - **No accounts** - Just create and share
+- **Decentralized** - Small vaults need zero external services; large vaults use Filecoin-backed IPFS
 
 ## Tech Stack
 
@@ -42,16 +43,17 @@ A fully decentralized app to lock secrets until a specific time. No accounts, no
 |-----------|------------|
 | Frontend | Next.js 15 + TypeScript + Tailwind CSS |
 | Encryption | Web Crypto API (AES-256-GCM) |
-| Storage | IPFS via Pinata |
+| Storage | URL-inline (small <8KB) or IPFS via Pinata (large) |
 | Time-Lock | Lit Protocol (datil-dev network) |
 | Local Data | IndexedDB (idb-keyval) |
+| Anti-Abuse | Cloudflare Turnstile (optional) |
 
 ## Setup
 
 ### Prerequisites
 
 - Node.js 18+
-- Free [Pinata](https://pinata.cloud) account
+- Free [Pinata](https://pinata.cloud) account (only needed for vaults >8KB)
 
 ### Installation
 
@@ -68,16 +70,33 @@ cp .env.example .env.local
 # Edit .env.local and add your Pinata JWT token
 ```
 
-### Get Pinata JWT
+### Get Pinata API Key (for large vaults)
+
+> **Note:** Small vaults (<8KB) are stored directly in the URL — no API key needed! Most use cases (passwords, phone numbers, short notes) work without any external service.
+
+For larger vaults, set up Pinata:
 
 1. Create free account at [pinata.cloud](https://pinata.cloud)
 2. Go to API Keys in dashboard
 3. Create new key with "pinFileToIPFS" permission
-4. Copy the JWT token to `.env.local`:
+4. Add to `.env.local`:
 
 ```env
 NEXT_PUBLIC_PINATA_JWT=your_jwt_token_here
 ```
+
+### Get Cloudflare Turnstile Keys (Anti-Abuse)
+
+1. Go to [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile) (free)
+2. Add a new site
+3. Copy the Site Key and Secret Key to `.env.local`:
+
+```env
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your_site_key_here
+TURNSTILE_SECRET_KEY=your_secret_key_here
+```
+
+> **Note:** CAPTCHA is optional. Without these keys, the app works but has no bot protection.
 
 ### Run
 

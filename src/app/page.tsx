@@ -152,21 +152,28 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="max-w-lg mx-auto mt-16 text-center space-y-3">
+      <footer className="max-w-lg mx-auto mt-16 text-center space-y-4">
         <p className="text-xs text-zinc-500">
-          No accounts. No servers. Your data lives on{' '}
-          <a href="https://ipfs.io" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200 underline">
-            IPFS
-          </a>
-          , time-locked by{' '}
-          <a href="https://litprotocol.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-200 underline">
-            Lit Protocol
-          </a>
-          .
+          No accounts. No servers. Encrypted in your browser.
         </p>
         <p className="text-xs text-zinc-600">
           We keep nothing. Verify everything.
         </p>
+        
+        {/* Powered by Lit Protocol badge */}
+        <a
+          href="https://litprotocol.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 hover:border-violet-500/40 transition-all group"
+        >
+          <svg className="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className="text-xs font-medium bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent group-hover:from-violet-300 group-hover:to-fuchsia-300 transition-all">
+            Powered by Lit Protocol
+          </span>
+        </a>
       </footer>
     </main>
     </>

@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { VaultCountdown } from '@/components/VaultCountdown';
 import { getVaultRef, VaultRef } from '@/lib/storage';
-import { fetchFromIPFS } from '@/lib/ipfs';
+import { fetchFromIPFS, fromBase64 } from '@/lib/ipfs';
 import { initLit, decryptKey, isUnlockable } from '@/lib/lit';
 import { importKey, decryptToString } from '@/lib/crypto';
 import { decodeVaultFromHash } from '@/lib/share';
@@ -74,9 +74,15 @@ export default function VaultPage() {
         vault.unlockTime,
       );
 
-      // Fetch encrypted data from IPFS
-      setProgress('Fetching from IPFS...');
-      const encryptedData = await fetchFromIPFS(vault.cid);
+      // Get encrypted data (inline from URL or fetch from IPFS)
+      let encryptedData: Uint8Array;
+      if (vault.inlineData) {
+        setProgress('Loading encrypted data...');
+        encryptedData = fromBase64(vault.inlineData);
+      } else {
+        setProgress('Fetching from IPFS...');
+        encryptedData = await fetchFromIPFS(vault.cid);
+      }
 
       // Import key and decrypt
       setProgress('Decrypting...');
@@ -175,7 +181,17 @@ export default function VaultPage() {
             unlockTime={vault.unlockTime}
             onUnlockReady={() => setState('ready')}
           />
-          <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-center gap-4">
+          
+          {/* No early access notice */}
+          <div className="mt-6 p-3 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
+            <p className="text-xs text-zinc-500 text-center">
+              No early access. No payment option. No support ticket.
+              <br />
+              <span className="text-zinc-400">Even we can&apos;t unlock it.</span>
+            </p>
+          </div>
+          
+          <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-center gap-4">
             <button
               onClick={() => setShowQR(true)}
               className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
@@ -185,17 +201,27 @@ export default function VaultPage() {
               </svg>
               Share QR
             </button>
-            <a
-              href={`https://explore.ipld.io/#/explore/${vault.cid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-              View on IPFS
-            </a>
+            {vault.cid && !vault.inlineData && (
+              <a
+                href={`https://explore.ipld.io/#/explore/${vault.cid}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                View on IPFS
+              </a>
+            )}
+            {vault.inlineData && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                Stored in link
+              </span>
+            )}
           </div>
         </div>
         <QRCodeModal
@@ -309,7 +335,7 @@ export default function VaultPage() {
             Create Vault
           </Link>
         </div>
-        {vault && (
+        {vault && vault.cid && !vault.inlineData && (
           <div className="mt-4 pt-4 border-t border-zinc-800 text-center">
             <a
               href={`https://explore.ipld.io/#/explore/${vault.cid}`}
@@ -325,6 +351,21 @@ export default function VaultPage() {
           </div>
         )}
       </div>
+      
+      {/* Powered by Lit Protocol badge */}
+      <a
+        href="https://litprotocol.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-8 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20 hover:border-violet-500/40 transition-all group"
+      >
+        <svg className="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <span className="text-xs font-medium bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent group-hover:from-violet-300 group-hover:to-fuchsia-300 transition-all">
+          Powered by Lit Protocol
+        </span>
+      </a>
     </main>
     </>
   );

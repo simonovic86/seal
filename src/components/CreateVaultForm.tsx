@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { TimeSelector } from './TimeSelector';
 import { useToast } from './Toast';
 import { QRCodeModal } from './QRCode';
+import { Turnstile } from './Turnstile';
 import { generateKey, exportKey, encrypt } from '@/lib/crypto';
 import { initLit, encryptKeyWithTimelock } from '@/lib/lit';
-import { uploadToIPFS } from '@/lib/ipfs';
+import { uploadToIPFS, shouldUseInlineStorage, toBase64 } from '@/lib/ipfs';
 import { saveVaultRef, VaultRef } from '@/lib/storage';
 import { getShareableUrl } from '@/lib/share';
 import { getFriendlyError } from '@/lib/errors';
@@ -18,18 +19,44 @@ interface CreateVaultFormProps {
 
 type Step = 'input' | 'creating' | 'done';
 
+type ProgressStep = {
+  id: string;
+  label: string;
+  endpoint?: string;
+  status: 'pending' | 'active' | 'done';
+};
+
+const PROGRESS_STEPS: Omit<ProgressStep, 'status'>[] = [
+  { id: 'captcha', label: 'Verifying human', endpoint: 'cloudflare.com' },
+  { id: 'encrypt', label: 'Encrypting in your browser', endpoint: 'local' },
+  { id: 'lit', label: 'Connecting to Lit Protocol', endpoint: 'litprotocol.com' },
+  { id: 'ipfs', label: 'Storing encrypted data', endpoint: 'URL or IPFS' },
+  { id: 'timelock', label: 'Applying time-lock', endpoint: 'litprotocol.com' },
+  { id: 'save', label: 'Saving locally', endpoint: 'local' },
+];
+
 export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
   const [secretText, setSecretText] = useState('');
   const [unlockTime, setUnlockTime] = useState<Date | null>(null);
   const [step, setStep] = useState<Step>('input');
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState('');
+  const [currentProgressStep, setCurrentProgressStep] = useState<string>('');
   const [createdVault, setCreatedVault] = useState<VaultRef | null>(null);
   const [showQR, setShowQR] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const { showToast, ToastComponent } = useToast();
 
   const hasContent = secretText.trim();
-  const canCreate = hasContent && unlockTime;
+  const hasCaptcha = !!captchaToken;
+  const canCreate = hasContent && unlockTime && hasCaptcha;
+
+  const handleCaptchaVerify = useCallback((token: string) => {
+    setCaptchaToken(token);
+  }, []);
+
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken(null);
+  }, []);
 
   const handleCreate = async () => {
     if (!canCreate || !unlockTime) return;
@@ -37,28 +64,63 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
     setError(null);
     setStep('creating');
 
-    try {
-      // Initialize Lit Protocol
-      setProgress('Connecting to Lit Network...');
-      await initLit();
+    // Helper to ensure minimum display time for each step
+    const minDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-      // Encrypt the secret
-      setProgress('Encrypting your secret...');
-      const symmetricKey = await generateKey();
+    try {
+      // Verify CAPTCHA server-side
+      setCurrentProgressStep('captcha');
+      const captchaResponse = await fetch('/api/verify-captcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+      
+      if (!captchaResponse.ok) {
+        throw new Error('CAPTCHA verification failed. Please try again.');
+      }
+      await minDelay(400);
+
+      // Encrypt the secret locally
+      setCurrentProgressStep('encrypt');
+      const [symmetricKey] = await Promise.all([
+        generateKey(),
+        minDelay(600),
+      ]);
       const encryptedData = await encrypt(secretText, symmetricKey);
       const rawKey = await exportKey(symmetricKey);
 
-      // Upload to IPFS
-      setProgress('Uploading to IPFS...');
-      const cid = await uploadToIPFS(encryptedData);
+      // Initialize Lit Protocol
+      setCurrentProgressStep('lit');
+      await Promise.all([initLit(), minDelay(600)]);
+
+      // Decide storage method: inline (URL) vs IPFS
+      const useInline = shouldUseInlineStorage(encryptedData);
+      let cid = '';
+      let inlineData: string | undefined;
+
+      if (useInline) {
+        // Store encrypted data directly in URL (no IPFS needed)
+        setCurrentProgressStep('ipfs'); // Still show step for consistency
+        inlineData = toBase64(encryptedData);
+        await minDelay(400); // Quick since no network call
+      } else {
+        // Upload to IPFS for larger vaults
+        setCurrentProgressStep('ipfs');
+        const [uploadedCid] = await Promise.all([
+          uploadToIPFS(encryptedData),
+          minDelay(600),
+        ]);
+        cid = uploadedCid;
+      }
 
       // Store key in Lit with time condition
-      setProgress('Securing with time-lock...');
+      setCurrentProgressStep('timelock');
       const unlockTimeMs = unlockTime.getTime();
-      const { encryptedKey, encryptedKeyHash } = await encryptKeyWithTimelock(
-        rawKey,
-        unlockTimeMs,
-      );
+      const [{ encryptedKey, encryptedKeyHash }] = await Promise.all([
+        encryptKeyWithTimelock(rawKey, unlockTimeMs),
+        minDelay(600),
+      ]);
 
       // Create vault reference
       const vault: VaultRef = {
@@ -68,11 +130,12 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
         litEncryptedKey: encryptedKey,
         litKeyHash: encryptedKeyHash,
         createdAt: Date.now(),
+        inlineData,
       };
 
       // Save locally for easy access
-      setProgress('Saving vault...');
-      await saveVaultRef(vault);
+      setCurrentProgressStep('save');
+      await Promise.all([saveVaultRef(vault), minDelay(400)]);
 
       setCreatedVault(vault);
       setStep('done');
@@ -90,9 +153,10 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
     setUnlockTime(null);
     setStep('input');
     setCreatedVault(null);
-    setProgress('');
+    setCurrentProgressStep('');
     setError(null);
     setShowQR(false);
+    setCaptchaToken(null);
   };
 
   const getVaultUrl = () => {
@@ -156,13 +220,14 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </button>
-          <button
-            onClick={handleReset}
-            className="flex-1 py-3 rounded-lg font-medium bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
-          >
-            Create Another
-          </button>
         </div>
+        
+        <button
+          onClick={handleReset}
+          className="w-full mt-3 py-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+          Done — Create Another
+        </button>
 
         <QRCodeModal
           url={getVaultUrl()}
@@ -170,21 +235,51 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
           onClose={() => setShowQR(false)}
         />
 
+        {/* Verification badges */}
         <div className="mt-6 pt-4 border-t border-zinc-800">
-          <p className="text-xs text-zinc-500 mb-2">
-            Your encrypted data is stored publicly on IPFS. We keep nothing.
+          <div className="grid grid-cols-1 gap-2 text-left mb-4">
+            <div className="flex items-center gap-2 text-xs">
+              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-zinc-400">Encrypted in your browser</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {createdVault.inlineData ? (
+                <span className="text-zinc-400">Stored in shareable link (no external service)</span>
+              ) : (
+                <>
+                  <span className="text-zinc-400">Stored on IPFS</span>
+                  <a
+                    href={`https://explore.ipld.io/#/explore/${createdVault.cid}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-violet-400 hover:text-violet-300 underline"
+                  >
+                    verify →
+                  </a>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-zinc-400">Time-locked via Lit Protocol</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <svg className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-zinc-400">Zero server storage</span>
+            </div>
+          </div>
+          <p className="text-xs text-zinc-600 text-center">
+            No early access — not for anyone, including us.
           </p>
-          <a
-            href={`https://explore.ipld.io/#/explore/${createdVault.cid}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            View on IPFS
-          </a>
         </div>
       </div>
       </>
@@ -193,13 +288,73 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
 
   // Creating state
   if (step === 'creating') {
+    const getStepStatus = (stepId: string): 'pending' | 'active' | 'done' => {
+      const stepIndex = PROGRESS_STEPS.findIndex(s => s.id === stepId);
+      const currentIndex = PROGRESS_STEPS.findIndex(s => s.id === currentProgressStep);
+      if (stepIndex < currentIndex) return 'done';
+      if (stepIndex === currentIndex) return 'active';
+      return 'pending';
+    };
+
     return (
-      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center animate-fade-in">
-        <div className="animate-spin w-12 h-12 border-3 border-violet-500 border-t-transparent rounded-full mx-auto mb-4" />
-        <h2 className="text-xl font-semibold text-zinc-100 mb-2">
+      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 animate-fade-in">
+        <h2 className="text-xl font-semibold text-zinc-100 mb-6 text-center">
           Creating Vault
         </h2>
-        <p className="text-sm text-zinc-400">{progress}</p>
+        
+        <div className="space-y-3">
+          {PROGRESS_STEPS.map((progressStep) => {
+            const status = getStepStatus(progressStep.id);
+            return (
+              <div
+                key={progressStep.id}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                  status === 'active' 
+                    ? 'bg-violet-500/10 border border-violet-500/30' 
+                    : status === 'done'
+                    ? 'bg-zinc-800/50'
+                    : 'opacity-40'
+                }`}
+              >
+                {/* Status icon */}
+                <div className="flex-shrink-0">
+                  {status === 'done' ? (
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <svg className="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  ) : status === 'active' ? (
+                    <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full border border-zinc-600" />
+                  )}
+                </div>
+                
+                {/* Label and endpoint */}
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium ${
+                    status === 'active' ? 'text-zinc-100' : 
+                    status === 'done' ? 'text-zinc-400' : 'text-zinc-500'
+                  }`}>
+                    {progressStep.label}
+                  </p>
+                  {progressStep.endpoint && (
+                    <p className={`text-xs ${
+                      status === 'active' ? 'text-violet-400' : 'text-zinc-600'
+                    }`}>
+                      → {progressStep.endpoint}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-xs text-zinc-500 text-center mt-6">
+          No data is sent to our servers
+        </p>
       </div>
     );
   }
@@ -233,6 +388,19 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
 
         {/* Time selector */}
         <TimeSelector value={unlockTime} onChange={setUnlockTime} />
+
+        {/* CAPTCHA */}
+        <div className="pt-2">
+          <Turnstile
+            onVerify={handleCaptchaVerify}
+            onExpire={handleCaptchaExpire}
+          />
+          {hasCaptcha && (
+            <p className="text-xs text-emerald-500 text-center mt-2">
+              ✓ Verified
+            </p>
+          )}
+        </div>
 
         {/* Error */}
         {error && <p className="text-sm text-red-400">{error}</p>}

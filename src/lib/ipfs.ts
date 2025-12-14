@@ -1,5 +1,8 @@
 /**
- * IPFS storage via Pinata (free tier: 1GB)
+ * IPFS storage via Pinata
+ * 
+ * For small vaults (<8KB), data is stored inline in the URL — no IPFS needed!
+ * For larger vaults, we use Pinata for IPFS storage.
  * 
  * Setup:
  * 1. Create free account at https://pinata.cloud
@@ -8,9 +11,46 @@
  */
 
 import { withRetry } from './retry';
+import { INLINE_DATA_THRESHOLD } from './storage';
 
 const PINATA_API = 'https://api.pinata.cloud';
-const PINATA_GATEWAY = 'https://gateway.pinata.cloud/ipfs';
+
+/**
+ * Convert Uint8Array to base64 string (for inline storage)
+ */
+export function toBase64(data: Uint8Array): string {
+  let binary = '';
+  for (let i = 0; i < data.byteLength; i++) {
+    binary += String.fromCharCode(data[i]);
+  }
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+/**
+ * Convert base64 string back to Uint8Array
+ */
+export function fromBase64(base64: string): Uint8Array {
+  // Restore standard base64
+  let b64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) b64 += '=';
+  
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
+ * Check if data should be stored inline (in URL) vs IPFS
+ */
+export function shouldUseInlineStorage(data: Uint8Array): boolean {
+  return data.byteLength <= INLINE_DATA_THRESHOLD;
+}
 
 /**
  * Upload encrypted data to IPFS via Pinata (with retry)
@@ -21,13 +61,20 @@ export async function uploadToIPFS(data: Uint8Array): Promise<string> {
   if (!jwt) {
     throw new Error(
       'IPFS upload requires Pinata API key. ' +
-        'Set NEXT_PUBLIC_PINATA_JWT in your environment.',
+      'Set NEXT_PUBLIC_PINATA_JWT in your environment. ' +
+      'Get a free key at https://pinata.cloud',
     );
   }
 
+  return uploadToPinata(data, jwt);
+}
+
+/**
+ * Upload to Pinata
+ */
+async function uploadToPinata(data: Uint8Array, jwt: string): Promise<string> {
   return withRetry(
     async () => {
-      // Create ArrayBuffer copy to avoid SharedArrayBuffer issues
       const buffer = new ArrayBuffer(data.byteLength);
       new Uint8Array(buffer).set(data);
 
@@ -45,7 +92,7 @@ export async function uploadToIPFS(data: Uint8Array): Promise<string> {
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(`Upload failed (${response.status}): ${text}`);
+        throw new Error(`Pinata upload failed (${response.status}): ${text}`);
       }
 
       const result = await response.json();
@@ -54,7 +101,7 @@ export async function uploadToIPFS(data: Uint8Array): Promise<string> {
     {
       maxAttempts: 3,
       onRetry: (attempt, error) => {
-        console.warn(`IPFS upload retry ${attempt}:`, error.message);
+        console.warn(`Pinata upload retry ${attempt}:`, error.message);
       },
     },
   );
