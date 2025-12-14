@@ -14,6 +14,7 @@ import { withRetry } from './retry';
 import { INLINE_DATA_THRESHOLD } from './storage';
 
 const PINATA_API = 'https://api.pinata.cloud';
+const PINATA_GATEWAY = 'https://gateway.pinata.cloud/ipfs';
 
 /**
  * Convert Uint8Array to base64 string (for inline storage)
