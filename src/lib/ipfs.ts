@@ -7,45 +7,57 @@
  * 3. Set NEXT_PUBLIC_PINATA_JWT environment variable
  */
 
+import { withRetry } from './retry';
+
 const PINATA_API = 'https://api.pinata.cloud';
 const PINATA_GATEWAY = 'https://gateway.pinata.cloud/ipfs';
 
 /**
- * Upload encrypted data to IPFS via Pinata
+ * Upload encrypted data to IPFS via Pinata (with retry)
  */
 export async function uploadToIPFS(data: Uint8Array): Promise<string> {
   const jwt = process.env.NEXT_PUBLIC_PINATA_JWT;
 
   if (!jwt) {
     throw new Error(
-      'IPFS upload requires NEXT_PUBLIC_PINATA_JWT. ' +
-        'Get a free API key at https://pinata.cloud',
+      'IPFS upload requires Pinata API key. ' +
+        'Set NEXT_PUBLIC_PINATA_JWT in your environment.',
     );
   }
 
-  // Create ArrayBuffer copy to avoid SharedArrayBuffer issues
-  const buffer = new ArrayBuffer(data.byteLength);
-  new Uint8Array(buffer).set(data);
+  return withRetry(
+    async () => {
+      // Create ArrayBuffer copy to avoid SharedArrayBuffer issues
+      const buffer = new ArrayBuffer(data.byteLength);
+      new Uint8Array(buffer).set(data);
 
-  const blob = new Blob([buffer], { type: 'application/octet-stream' });
-  const formData = new FormData();
-  formData.append('file', blob, 'vault.bin');
+      const blob = new Blob([buffer], { type: 'application/octet-stream' });
+      const formData = new FormData();
+      formData.append('file', blob, 'vault.bin');
 
-  const response = await fetch(`${PINATA_API}/pinning/pinFileToIPFS`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${jwt}`,
+      const response = await fetch(`${PINATA_API}/pinning/pinFileToIPFS`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Upload failed (${response.status}): ${text}`);
+      }
+
+      const result = await response.json();
+      return result.IpfsHash;
     },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`IPFS upload failed: ${error}`);
-  }
-
-  const result = await response.json();
-  return result.IpfsHash;
+    {
+      maxAttempts: 3,
+      onRetry: (attempt, error) => {
+        console.warn(`IPFS upload retry ${attempt}:`, error.message);
+      },
+    },
+  );
 }
 
 /**

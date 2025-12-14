@@ -8,6 +8,9 @@ import { getVaultRef, VaultRef } from '@/lib/storage';
 import { fetchFromIPFS } from '@/lib/ipfs';
 import { initLit, decryptKey, isUnlockable } from '@/lib/lit';
 import { importKey, decryptToString } from '@/lib/crypto';
+import { decodeVaultFromHash } from '@/lib/share';
+import { useToast } from '@/components/Toast';
+import { getFriendlyError } from '@/lib/errors';
 
 type State = 'loading' | 'not_found' | 'locked' | 'ready' | 'unlocking' | 'unlocked' | 'error';
 
@@ -19,16 +22,34 @@ export default function VaultPage() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState('');
   const [decryptedSecret, setDecryptedSecret] = useState<string | null>(null);
+  const [isSharedLink, setIsSharedLink] = useState(false);
+  const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
-    getVaultRef(id).then((v) => {
-      if (v) {
-        setVault(v);
-        setState(isUnlockable(v.unlockTime) ? 'ready' : 'locked');
-      } else {
-        setState('not_found');
+    const loadVault = async () => {
+      // First try localStorage
+      const localVault = await getVaultRef(id);
+      if (localVault) {
+        setVault(localVault);
+        setState(isUnlockable(localVault.unlockTime) ? 'ready' : 'locked');
+        return;
       }
-    });
+
+      // Then try URL hash (shared link)
+      const hash = window.location.hash;
+      const sharedVault = decodeVaultFromHash(hash, id);
+      if (sharedVault) {
+        setVault(sharedVault);
+        setIsSharedLink(true);
+        setState(isUnlockable(sharedVault.unlockTime) ? 'ready' : 'locked');
+        return;
+      }
+
+      // Not found anywhere
+      setState('not_found');
+    };
+
+    loadVault();
   }, [id]);
 
   const handleUnlock = async () => {
@@ -63,7 +84,8 @@ export default function VaultPage() {
       setState('unlocked');
     } catch (err) {
       console.error('Unlock error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to unlock vault');
+      const friendlyError = getFriendlyError(err instanceof Error ? err : new Error(String(err)));
+      setError(friendlyError.message);
       setState('error');
     }
   };
@@ -89,7 +111,7 @@ export default function VaultPage() {
           </div>
           <h1 className="text-xl font-semibold text-zinc-100 mb-2">Vault Not Found</h1>
           <p className="text-sm text-zinc-400 mb-6">
-            This vault doesn&apos;t exist or was created on another device.
+            This vault doesn&apos;t exist. Make sure you have the complete shareable link.
           </p>
           <Link href="/" className="inline-flex px-6 py-3 rounded-lg font-medium bg-violet-600 text-white hover:bg-violet-500 transition-colors">
             Create a Vault
@@ -183,7 +205,7 @@ export default function VaultPage() {
           </p>
           <button
             onClick={handleUnlock}
-            className="w-full py-3 rounded-lg font-medium bg-emerald-600 text-white hover:bg-emerald-500 transition-colors"
+            className="w-full py-3 rounded-lg font-medium bg-emerald-600 text-white hover:bg-emerald-500 transition-colors animate-pulse-glow"
           >
             Unlock Vault
           </button>
@@ -207,6 +229,8 @@ export default function VaultPage() {
 
   // Unlocked
   return (
+    <>
+    {ToastComponent}
     <main className="min-h-screen py-12 px-4">
       <div className="max-w-lg mx-auto mb-8">
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
@@ -233,7 +257,10 @@ export default function VaultPage() {
         </div>
         <div className="mt-6 flex gap-3">
           <button
-            onClick={() => navigator.clipboard.writeText(decryptedSecret || '')}
+            onClick={() => {
+              navigator.clipboard.writeText(decryptedSecret || '');
+              showToast('Secret copied!');
+            }}
             className="flex-1 py-3 rounded-lg font-medium bg-violet-600 text-white hover:bg-violet-500 transition-colors"
           >
             Copy Secret
@@ -244,6 +271,7 @@ export default function VaultPage() {
         </div>
       </div>
     </main>
+    </>
   );
 }
 

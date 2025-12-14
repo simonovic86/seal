@@ -18,6 +18,7 @@ import {
 import { LIT_ABILITY } from '@lit-protocol/constants';
 import { ethers } from 'ethers';
 import { toBase64, fromBase64 } from './crypto';
+import { withRetry } from './retry';
 
 let litNodeClient: LitNodeClient | null = null;
 
@@ -45,18 +46,29 @@ function getEphemeralWallet(): ethers.Wallet {
 }
 
 /**
- * Initialize the Lit Protocol client
+ * Initialize the Lit Protocol client (with retry)
  */
 export async function initLit(): Promise<LitNodeClient> {
   if (litNodeClient) return litNodeClient;
 
-  litNodeClient = new LitNodeClient({
-    litNetwork: LIT_NETWORK,
-    debug: false,
-  });
+  return withRetry(
+    async () => {
+      const client = new LitNodeClient({
+        litNetwork: LIT_NETWORK,
+        debug: false,
+      });
 
-  await litNodeClient.connect();
-  return litNodeClient;
+      await client.connect();
+      litNodeClient = client;
+      return client;
+    },
+    {
+      maxAttempts: 3,
+      onRetry: (attempt, error) => {
+        console.warn(`Lit connection retry ${attempt}:`, error.message);
+      },
+    },
+  );
 }
 
 /**
@@ -159,31 +171,41 @@ export async function encryptKeyWithTimelock(
 }
 
 /**
- * Decrypt the symmetric key after the unlock time has passed
+ * Decrypt the symmetric key after the unlock time has passed (with retry)
  */
 export async function decryptKey(
   encryptedKey: string,
   encryptedKeyHash: string,
   unlockTime: number,
 ): Promise<Uint8Array> {
-  const client = getLitClient();
-  const accessControlConditions = createTimeCondition(unlockTime);
+  return withRetry(
+    async () => {
+      const client = getLitClient();
+      const accessControlConditions = createTimeCondition(unlockTime);
 
-  // Get session signatures using ephemeral wallet
-  const sessionSigs = await getSessionSigs();
+      // Get session signatures using ephemeral wallet
+      const sessionSigs = await getSessionSigs();
 
-  const decryptedString = await decryptToString(
-    {
-      accessControlConditions,
-      ciphertext: encryptedKey,
-      dataToEncryptHash: encryptedKeyHash,
-      sessionSigs,
-      chain: 'ethereum',
+      const decryptedString = await decryptToString(
+        {
+          accessControlConditions,
+          ciphertext: encryptedKey,
+          dataToEncryptHash: encryptedKeyHash,
+          sessionSigs,
+          chain: 'ethereum',
+        },
+        client,
+      );
+
+      return fromBase64(decryptedString);
     },
-    client,
+    {
+      maxAttempts: 2,
+      onRetry: (attempt, error) => {
+        console.warn(`Lit decryption retry ${attempt}:`, error.message);
+      },
+    },
   );
-
-  return fromBase64(decryptedString);
 }
 
 /**

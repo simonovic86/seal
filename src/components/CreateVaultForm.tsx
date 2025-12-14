@@ -3,10 +3,13 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { TimeSelector } from './TimeSelector';
+import { useToast } from './Toast';
 import { generateKey, exportKey, encrypt } from '@/lib/crypto';
 import { initLit, encryptKeyWithTimelock } from '@/lib/lit';
 import { uploadToIPFS } from '@/lib/ipfs';
 import { saveVaultRef, VaultRef } from '@/lib/storage';
+import { getShareableUrl } from '@/lib/share';
+import { getFriendlyError } from '@/lib/errors';
 
 interface CreateVaultFormProps {
   onVaultCreated?: (vault: VaultRef) => void;
@@ -21,6 +24,7 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState('');
   const [createdVault, setCreatedVault] = useState<VaultRef | null>(null);
+  const { showToast, ToastComponent } = useToast();
 
   const hasContent = secretText.trim();
   const canCreate = hasContent && unlockTime;
@@ -73,7 +77,8 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
       onVaultCreated?.(vault);
     } catch (err) {
       console.error('Vault creation error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create vault');
+      const friendlyError = getFriendlyError(err instanceof Error ? err : new Error(String(err)));
+      setError(friendlyError.message);
       setStep('input');
     }
   };
@@ -89,18 +94,20 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
 
   const getVaultUrl = () => {
     if (!createdVault) return '';
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}/vault/${createdVault.id}`;
+    return getShareableUrl(createdVault);
   };
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(getVaultUrl());
+    showToast('Link copied!');
   };
 
   // Success state
   if (step === 'done' && createdVault) {
     return (
-      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center">
+      <>
+      {ToastComponent}
+      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center animate-fade-in">
         <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
           <svg
             className="w-8 h-8 text-emerald-400"
@@ -153,17 +160,17 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
         </div>
 
         <p className="mt-6 text-xs text-zinc-600">
-          Your encrypted secret is stored on IPFS. The decryption key is
-          time-locked via Lit Protocol.
+          Encrypted on IPFS, time-locked via Lit. Link works on any device.
         </p>
       </div>
+      </>
     );
   }
 
   // Creating state
   if (step === 'creating') {
     return (
-      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center">
+      <div className="max-w-lg mx-auto p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-center animate-fade-in">
         <div className="animate-spin w-12 h-12 border-3 border-violet-500 border-t-transparent rounded-full mx-auto mb-4" />
         <h2 className="text-xl font-semibold text-zinc-100 mb-2">
           Creating Vault
