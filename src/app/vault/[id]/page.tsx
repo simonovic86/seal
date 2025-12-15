@@ -11,6 +11,7 @@ import { importKey, decryptToString } from '@/lib/crypto';
 import { decodeVaultFromHash } from '@/lib/share';
 import { useToast } from '@/components/Toast';
 import { QRCodeModal } from '@/components/QRCode';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { getFriendlyError } from '@/lib/errors';
 import { getShareableUrl } from '@/lib/share';
 
@@ -26,6 +27,7 @@ export default function VaultPage() {
   const [decryptedSecret, setDecryptedSecret] = useState<string | null>(null);
   const [isSharedLink, setIsSharedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [showDestroyConfirm, setShowDestroyConfirm] = useState(false);
   const { showToast, ToastComponent } = useToast();
 
   useEffect(() => {
@@ -54,6 +56,13 @@ export default function VaultPage() {
 
     loadVault();
   }, [id]);
+
+  // Security: Clear decrypted secret from memory on unmount
+  useEffect(() => {
+    return () => {
+      setDecryptedSecret(null);
+    };
+  }, []);
 
   const handleUnlock = async () => {
     if (!vault) return;
@@ -264,7 +273,16 @@ export default function VaultPage() {
 
   // Ready to unlock
   if (state === 'ready' && vault) {
+    const handleUnlockClick = () => {
+      if (vault.destroyAfterRead) {
+        setShowDestroyConfirm(true);
+      } else {
+        handleUnlock();
+      }
+    };
+
     return (
+      <>
       <main className="min-h-screen py-12 px-4">
         <div className="max-w-lg mx-auto mb-8">
           <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
@@ -290,7 +308,7 @@ export default function VaultPage() {
             )}
           </p>
           <button
-            onClick={handleUnlock}
+            onClick={handleUnlockClick}
             className="w-full py-3 rounded-lg font-medium bg-emerald-600 text-white hover:bg-emerald-500 transition-colors animate-pulse-glow"
           >
             Unlock Vault
@@ -311,6 +329,20 @@ export default function VaultPage() {
           onClose={() => setShowQR(false)}
         />
       </main>
+      <ConfirmModal
+        isOpen={showDestroyConfirm}
+        title="Destroy After Reading"
+        message="This vault will be permanently destroyed after you view its contents. This action cannot be undone. Are you sure you want to continue?"
+        confirmText="Yes, Unlock & Destroy"
+        cancelText="Cancel"
+        variant="warning"
+        onConfirm={() => {
+          setShowDestroyConfirm(false);
+          handleUnlock();
+        }}
+        onCancel={() => setShowDestroyConfirm(false)}
+      />
+      </>
     );
   }
 

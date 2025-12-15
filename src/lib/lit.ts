@@ -6,34 +6,75 @@
  * 
  * For "Free Mode" without user wallets, we use an ephemeral wallet
  * stored in localStorage for signing auth messages.
+ * 
+ * NOTE: All Lit SDK imports are lazy-loaded to reduce initial bundle size.
+ * The SDK is ~1MB+ and only loaded when actually needed.
  */
 
-import { LitNodeClient } from '@lit-protocol/lit-node-client';
-import { encryptString, decryptToString } from '@lit-protocol/encryption';
-import {
-  LitAccessControlConditionResource,
-  createSiweMessage,
-  generateAuthSig,
-} from '@lit-protocol/auth-helpers';
-import { LIT_ABILITY } from '@lit-protocol/constants';
-import { ethers } from 'ethers';
 import { toBase64, fromBase64 } from './crypto';
 import { withRetry } from './retry';
 
+// Types for lazy-loaded modules
+type LitNodeClient = import('@lit-protocol/lit-node-client').LitNodeClient;
+type EthersWallet = import('ethers').Wallet;
+
+// Cached module references
 let litNodeClient: LitNodeClient | null = null;
+let cachedModules: {
+  LitNodeClient?: typeof import('@lit-protocol/lit-node-client').LitNodeClient;
+  encryption?: typeof import('@lit-protocol/encryption');
+  authHelpers?: typeof import('@lit-protocol/auth-helpers');
+  constants?: typeof import('@lit-protocol/constants');
+  ethers?: typeof import('ethers');
+} = {};
 
 // Lit network - use datil-dev for testing, datil for production
 const LIT_NETWORK = 'datil-dev';
 const WALLET_KEY = 'lit-ephemeral-wallet';
 
 /**
+ * Lazy load Lit SDK modules
+ * Only imports the heavy dependencies when actually needed
+ */
+async function loadLitModules() {
+  if (cachedModules.LitNodeClient) return cachedModules;
+
+  const [
+    { LitNodeClient },
+    encryption,
+    authHelpers,
+    constants,
+    ethers,
+  ] = await Promise.all([
+    import('@lit-protocol/lit-node-client'),
+    import('@lit-protocol/encryption'),
+    import('@lit-protocol/auth-helpers'),
+    import('@lit-protocol/constants'),
+    import('ethers'),
+  ]);
+
+  cachedModules = {
+    LitNodeClient,
+    encryption,
+    authHelpers,
+    constants,
+    ethers,
+  };
+
+  return cachedModules;
+}
+
+/**
  * Get or create an ephemeral wallet for Lit auth
  * This allows "Free Mode" without requiring users to connect their own wallet
  */
-function getEphemeralWallet(): ethers.Wallet {
+async function getEphemeralWallet(): Promise<EthersWallet> {
   if (typeof window === 'undefined') {
     throw new Error('Ephemeral wallet requires browser environment');
   }
+
+  const { ethers } = await loadLitModules();
+  if (!ethers) throw new Error('Failed to load ethers');
 
   let privateKey = localStorage.getItem(WALLET_KEY);
   if (!privateKey) {
@@ -47,12 +88,16 @@ function getEphemeralWallet(): ethers.Wallet {
 
 /**
  * Initialize the Lit Protocol client (with retry)
+ * Lazy loads the Lit SDK on first call
  */
 export async function initLit(): Promise<LitNodeClient> {
   if (litNodeClient) return litNodeClient;
 
   return withRetry(
     async () => {
+      const { LitNodeClient } = await loadLitModules();
+      if (!LitNodeClient) throw new Error('Failed to load LitNodeClient');
+
       const client = new LitNodeClient({
         litNetwork: LIT_NETWORK,
         debug: false,
@@ -110,7 +155,13 @@ function createTimeCondition(unlockTime: number) {
  */
 async function getSessionSigs() {
   const client = getLitClient();
-  const wallet = getEphemeralWallet();
+  const { authHelpers, constants } = await loadLitModules();
+  
+  if (!authHelpers || !constants) {
+    throw new Error('Failed to load Lit auth modules');
+  }
+
+  const wallet = await getEphemeralWallet();
   const address = await wallet.getAddress();
 
   const sessionSigs = await client.getSessionSigs({
@@ -118,12 +169,12 @@ async function getSessionSigs() {
     expiration: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24 hours
     resourceAbilityRequests: [
       {
-        resource: new LitAccessControlConditionResource('*'),
-        ability: LIT_ABILITY.AccessControlConditionDecryption,
+        resource: new authHelpers.LitAccessControlConditionResource('*'),
+        ability: constants.LIT_ABILITY.AccessControlConditionDecryption,
       },
     ],
     authNeededCallback: async ({ uri, expiration, resourceAbilityRequests }) => {
-      const toSign = await createSiweMessage({
+      const toSign = await authHelpers.createSiweMessage({
         uri: uri!,
         expiration: expiration!,
         resources: resourceAbilityRequests!,
@@ -132,7 +183,7 @@ async function getSessionSigs() {
         litNodeClient: client,
       });
 
-      return await generateAuthSig({
+      return await authHelpers.generateAuthSig({
         signer: wallet,
         toSign,
       });
@@ -151,12 +202,18 @@ export async function encryptKeyWithTimelock(
   unlockTime: number,
 ): Promise<{ encryptedKey: string; encryptedKeyHash: string }> {
   const client = getLitClient();
+  const { encryption } = await loadLitModules();
+  
+  if (!encryption) {
+    throw new Error('Failed to load Lit encryption module');
+  }
+
   const accessControlConditions = createTimeCondition(unlockTime);
 
   // Convert key to string for encryption
   const keyString = toBase64(symmetricKey);
 
-  const { ciphertext, dataToEncryptHash } = await encryptString(
+  const { ciphertext, dataToEncryptHash } = await encryption.encryptString(
     {
       accessControlConditions,
       dataToEncrypt: keyString,
@@ -181,12 +238,18 @@ export async function decryptKey(
   return withRetry(
     async () => {
       const client = getLitClient();
+      const { encryption } = await loadLitModules();
+      
+      if (!encryption) {
+        throw new Error('Failed to load Lit encryption module');
+      }
+
       const accessControlConditions = createTimeCondition(unlockTime);
 
       // Get session signatures using ephemeral wallet
       const sessionSigs = await getSessionSigs();
 
-      const decryptedString = await decryptToString(
+      const decryptedString = await encryption.decryptToString(
         {
           accessControlConditions,
           ciphertext: encryptedKey,
@@ -210,6 +273,7 @@ export async function decryptKey(
 
 /**
  * Check if the current time is past the unlock time
+ * This is a pure function with no dependencies - always fast
  */
 export function isUnlockable(unlockTime: number): boolean {
   return Date.now() >= unlockTime;

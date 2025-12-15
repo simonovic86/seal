@@ -36,6 +36,7 @@ const PROGRESS_STEPS: Omit<ProgressStep, 'status'>[] = [
 ];
 
 export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
+  const [vaultName, setVaultName] = useState('');
   const [secretText, setSecretText] = useState('');
   const [unlockTime, setUnlockTime] = useState<Date | null>(null);
   const [step, setStep] = useState<Step>('input');
@@ -136,6 +137,7 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
         litEncryptedKey: encryptedKey,
         litKeyHash: encryptedKeyHash,
         createdAt: Date.now(),
+        name: vaultName.trim() || undefined,
         inlineData,
         destroyAfterRead,
       };
@@ -156,6 +158,7 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
   };
 
   const handleReset = () => {
+    setVaultName('');
     setSecretText('');
     setUnlockTime(null);
     setStep('input');
@@ -199,7 +202,7 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
           </svg>
         </div>
         <h2 className="text-xl font-semibold text-zinc-100 mb-2">
-          Vault Created!
+          {createdVault.name ? `"${createdVault.name}"` : 'Vault'} Created!
         </h2>
         <p className="text-sm text-zinc-400 mb-6">
           Your secret is locked until {unlockTime?.toLocaleString()}
@@ -380,6 +383,26 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
       </h2>
 
       <div className="space-y-6">
+        {/* Vault name */}
+        <div>
+          <label className="block text-sm font-medium text-zinc-300 mb-2">
+            Vault name <span className="text-zinc-500 font-normal">(optional)</span>
+          </label>
+          <input
+            type="text"
+            value={vaultName}
+            onChange={(e) => setVaultName(e.target.value)}
+            placeholder="e.g., Birthday message for Mom"
+            maxLength={100}
+            className="
+              w-full px-4 py-3 rounded-lg
+              bg-zinc-800 border border-zinc-700
+              text-zinc-100 placeholder-zinc-500
+              focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+            "
+          />
+        </div>
+
         {/* Text input */}
         <div>
           <label className="block text-sm font-medium text-zinc-300 mb-2">
