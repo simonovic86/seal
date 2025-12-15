@@ -7,22 +7,14 @@ import { get, set, del, keys } from 'idb-keyval';
 
 export interface VaultRef {
   id: string;
-  cid: string;           // IPFS CID (empty string if using inline data)
   unlockTime: number;
   litEncryptedKey: string;
   litKeyHash: string;
   createdAt: number;
   name?: string;
-  inlineData?: string;   // Base64 encrypted data (for small vaults, no IPFS needed)
-  destroyAfterRead?: boolean; // If true, vault is deleted after first unlock
+  inlineData: string;  // Base64 encrypted data stored in URL
+  destroyAfterRead?: boolean;
 }
-
-// Threshold for inline storage (data stored directly in URL)
-// 32KB works in all modern browsers and covers 99% of text use cases
-export const INLINE_DATA_THRESHOLD = 32 * 1024; // 32KB
-
-// Maximum vault size (must fit in URL)
-export const MAX_VAULT_SIZE = 32 * 1024; // 32KB
 
 const VAULT_PREFIX = 'vault:';
 
@@ -66,4 +58,3 @@ export async function getAllVaultRefs(): Promise<VaultRef[]> {
 
   return vaults.sort((a, b) => b.createdAt - a.createdAt);
 }
-

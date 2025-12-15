@@ -7,10 +7,13 @@ import { useToast } from './Toast';
 import { QRCodeModal } from './QRCode';
 import { generateKey, exportKey, encrypt } from '@/lib/crypto';
 import { initLit, encryptKeyWithTimelock } from '@/lib/lit';
-import { toBase64 } from '@/lib/ipfs';
-import { saveVaultRef, VaultRef, MAX_VAULT_SIZE } from '@/lib/storage';
+import { toBase64 } from '@/lib/encoding';
+import { saveVaultRef, VaultRef } from '@/lib/storage';
 import { getShareableUrl } from '@/lib/share';
 import { getFriendlyError } from '@/lib/errors';
+
+// Maximum vault size (must fit in URL)
+const MAX_VAULT_SIZE = 32 * 1024; // 32KB
 
 interface CreateVaultFormProps {
   onVaultCreated?: (vault: VaultRef) => void;
@@ -96,7 +99,6 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
       // Create vault reference
       const vault: VaultRef = {
         id: uuidv4(),
-        cid: '', // No IPFS - all inline
         unlockTime: unlockTimeMs,
         litEncryptedKey: encryptedKey,
         litKeyHash: encryptedKeyHash,

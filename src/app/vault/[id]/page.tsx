@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { VaultCountdown } from '@/components/VaultCountdown';
 import { getVaultRef, deleteVaultRef, VaultRef } from '@/lib/storage';
-import { fetchFromIPFS, fromBase64 } from '@/lib/ipfs';
+import { fromBase64 } from '@/lib/encoding';
 import { initLit, decryptKey, isUnlockable } from '@/lib/lit';
 import { importKey, decryptToString } from '@/lib/crypto';
 import { decodeVaultFromHash } from '@/lib/share';
@@ -25,7 +25,6 @@ export default function VaultPage() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState('');
   const [decryptedSecret, setDecryptedSecret] = useState<string | null>(null);
-  const [isSharedLink, setIsSharedLink] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [showDestroyConfirm, setShowDestroyConfirm] = useState(false);
   const { showToast, ToastComponent } = useToast();
@@ -45,7 +44,6 @@ export default function VaultPage() {
       const sharedVault = decodeVaultFromHash(hash, id);
       if (sharedVault) {
         setVault(sharedVault);
-        setIsSharedLink(true);
         setState(isUnlockable(sharedVault.unlockTime) ? 'ready' : 'locked');
         return;
       }
@@ -83,15 +81,9 @@ export default function VaultPage() {
         vault.unlockTime,
       );
 
-      // Get encrypted data (inline from URL or fetch from IPFS)
-      let encryptedData: Uint8Array;
-      if (vault.inlineData) {
-        setProgress('Loading encrypted data...');
-        encryptedData = fromBase64(vault.inlineData);
-      } else {
-        setProgress('Fetching from IPFS...');
-        encryptedData = await fetchFromIPFS(vault.cid);
-      }
+      // Load encrypted data from URL
+      setProgress('Loading encrypted data...');
+      const encryptedData = fromBase64(vault.inlineData);
 
       // Import key and decrypt
       setProgress('Decrypting...');
@@ -216,7 +208,7 @@ export default function VaultPage() {
             </p>
           </div>
           
-          <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-center gap-4">
+          <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-center">
             <button
               onClick={() => setShowQR(true)}
               className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
@@ -226,27 +218,6 @@ export default function VaultPage() {
               </svg>
               Share QR
             </button>
-            {vault.cid && !vault.inlineData && (
-              <a
-                href={`https://explore.ipld.io/#/explore/${vault.cid}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                View on IPFS
-              </a>
-            )}
-            {vault.inlineData && (
-              <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-                Stored in link
-              </span>
-            )}
           </div>
         </div>
         <QRCodeModal
@@ -434,21 +405,6 @@ export default function VaultPage() {
             Create Vault
           </Link>
         </div>
-        {vault && vault.cid && !vault.inlineData && (
-          <div className="mt-4 pt-4 border-t border-zinc-800 text-center">
-            <a
-              href={`https://explore.ipld.io/#/explore/${vault.cid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-              View on IPFS
-            </a>
-          </div>
-        )}
       </div>
       
       {/* Technology badges */}
@@ -465,23 +421,6 @@ export default function VaultPage() {
           </svg>
           <span className="text-xs font-medium bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
             Lit Protocol
-          </span>
-        </a>
-        
-        {/* IPFS */}
-        <a
-          href="https://ipfs.tech"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-cyan-500/10 to-teal-500/10 border border-cyan-500/20 hover:border-cyan-500/40 transition-all"
-        >
-          <svg className="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-            <polyline points="2 17 12 22 22 17"/>
-            <polyline points="2 12 12 17 22 12"/>
-          </svg>
-          <span className="text-xs font-medium bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
-            IPFS
           </span>
         </a>
         

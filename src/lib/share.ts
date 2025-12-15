@@ -9,37 +9,29 @@ import { VaultRef } from './storage';
 
 // Compact format to minimize URL length
 interface ShareableData {
-  c: string;  // cid (empty string if using inline data)
   k: string;  // litEncryptedKey
   h: string;  // litKeyHash
   t: number;  // unlockTime
   n?: string; // name (optional)
-  d?: string; // inlineData (base64 encrypted data, for small vaults)
+  d: string;  // inlineData (base64 encrypted data)
   x?: boolean; // destroyAfterRead (burn after reading)
 }
 
 /**
  * Encode vault data for URL hash
- * Supports both IPFS (CID) and inline data modes
  */
 export function encodeVaultForShare(vault: VaultRef): string {
   const data: ShareableData = {
-    c: vault.cid,
     k: vault.litEncryptedKey,
     h: vault.litKeyHash,
     t: vault.unlockTime,
+    d: vault.inlineData,
   };
 
   if (vault.name) {
     data.n = vault.name;
   }
 
-  // Include inline data if present (for small vaults with no IPFS)
-  if (vault.inlineData) {
-    data.d = vault.inlineData;
-  }
-
-  // Include destroy flag if set
   if (vault.destroyAfterRead) {
     data.x = true;
   }
@@ -77,19 +69,13 @@ export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
     const json = atob(base64);
     const data: ShareableData = JSON.parse(json);
 
-    // Validate required fields (cid can be empty if inline data is present)
-    if (!data.k || !data.h || !data.t) {
-      return null;
-    }
-
-    // Must have either CID or inline data
-    if (!data.c && !data.d) {
+    // Validate required fields
+    if (!data.k || !data.h || !data.t || !data.d) {
       return null;
     }
 
     return {
       id,
-      cid: data.c || '',
       litEncryptedKey: data.k,
       litKeyHash: data.h,
       unlockTime: data.t,
@@ -136,7 +122,6 @@ export function encodeBackupUrl(vaults: VaultRef[]): string {
     v: 1,
     vaults: vaults.map((vault) => ({
       id: vault.id,
-      c: vault.cid,
       k: vault.litEncryptedKey,
       h: vault.litKeyHash,
       t: vault.unlockTime,
@@ -186,7 +171,6 @@ export function decodeBackupFromHash(hash: string): VaultRef[] | null {
 
     return bundle.vaults.map((data) => ({
       id: data.id,
-      cid: data.c || '',
       litEncryptedKey: data.k,
       litKeyHash: data.h,
       unlockTime: data.t,
@@ -200,4 +184,3 @@ export function decodeBackupFromHash(hash: string): VaultRef[] | null {
     return null;
   }
 }
-
