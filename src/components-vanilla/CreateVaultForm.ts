@@ -95,7 +95,7 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
     nameInput.maxLength = 100;
     nameInput.value = this.state.vaultName;
     nameInput.addEventListener('input', (e) => {
-      this.setState({ vaultName: (e.target as HTMLInputElement).value });
+      this.state.vaultName = (e.target as HTMLInputElement).value;
     });
     nameField.appendChild(nameLabel);
     nameField.appendChild(nameInput);
@@ -122,7 +122,8 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
     }
 
     secretTextarea.addEventListener('input', (e) => {
-      this.setState({ secretText: (e.target as HTMLTextAreaElement).value });
+      this.state.secretText = (e.target as HTMLTextAreaElement).value;
+      this.updateInputFormState();
     });
 
     secretField.appendChild(secretLabel);
@@ -158,9 +159,7 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
     checkbox.type = 'checkbox';
     checkbox.checked = this.state.destroyAfterRead;
     checkbox.addEventListener('change', (e) => {
-      this.setState({
-        destroyAfterRead: (e.target as HTMLInputElement).checked,
-      });
+      this.state.destroyAfterRead = (e.target as HTMLInputElement).checked;
     });
 
     const checkboxTextContainer = this.createElement('div');
@@ -401,12 +400,33 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
   }
 
   private async handleCreate(): Promise<void> {
+    // Read values directly from DOM
+    const nameInput = this.element.querySelector('input[type="text"]') as HTMLInputElement;
+    const secretTextarea = this.element.querySelector('textarea') as HTMLTextAreaElement;
+    const checkbox = this.element.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    
+    const vaultName = nameInput?.value || '';
+    const secretText = secretTextarea?.value || '';
+    const destroyAfterRead = checkbox?.checked || false;
     const unlockTime = this.timeSelector?.getValue();
-    const hasContent = this.state.secretText.trim();
-    if (!hasContent || !unlockTime) return;
+    
+    console.log('handleCreate called:', { 
+      secretText, 
+      unlockTime, 
+      vaultName, 
+      destroyAfterRead,
+      hasTextarea: !!secretTextarea,
+      textareaValue: secretTextarea?.value,
+      timeSelectorExists: !!this.timeSelector
+    });
+    
+    const hasContent = secretText.trim();
+    if (!hasContent || !unlockTime) {
+      console.log('Validation failed:', { hasContent: !!hasContent, unlockTime: !!unlockTime });
+      return;
+    }
 
-    const estimatedSize =
-      new TextEncoder().encode(this.state.secretText).length * 1.5;
+    const estimatedSize = new TextEncoder().encode(secretText).length * 1.5;
     const tooLarge = estimatedSize > MAX_VAULT_SIZE;
 
     if (tooLarge) {
@@ -416,6 +436,11 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
       return;
     }
 
+    // Update state with actual values
+    this.state.vaultName = vaultName;
+    this.state.secretText = secretText;
+    this.state.destroyAfterRead = destroyAfterRead;
+    
     this.setState({ error: null, step: 'creating' });
 
     const minDelay = (ms: number) =>
@@ -425,7 +450,7 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
       // Encrypt the secret locally
       this.setState({ currentProgressStep: 'encrypt' });
       const [symmetricKey] = await Promise.all([generateKey(), minDelay(600)]);
-      const encryptedData = await encrypt(this.state.secretText, symmetricKey);
+      const encryptedData = await encrypt(secretText, symmetricKey);
       const rawKey = await exportKey(symmetricKey);
 
       // Initialize Lit Protocol
@@ -452,9 +477,9 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
         litEncryptedKey: encryptedKey,
         litKeyHash: encryptedKeyHash,
         createdAt: Date.now(),
-        name: this.state.vaultName.trim() || undefined,
+        name: vaultName.trim() || undefined,
         inlineData,
-        destroyAfterRead: this.state.destroyAfterRead,
+        destroyAfterRead,
       };
 
       // Save locally for easy access
