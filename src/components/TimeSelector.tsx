@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import styles from './TimeSelector.module.css';
 
 interface TimeSelectorProps {
   value: Date | null;
@@ -59,13 +60,13 @@ export function TimeSelector({ value, onChange }: TimeSelectorProps) {
   }, [value]);
 
   return (
-    <div className="space-y-3">
-      <label className="block text-sm font-medium text-zinc-300">
+    <div className={styles.container}>
+      <label className={styles.label}>
         Lock until
       </label>
 
       {/* Segmented control container */}
-      <div className="segmented-control">
+      <div className={styles.segmentedControl}>
         {PRESETS.map((preset) => {
           const isSelected = preset.hours === selection;
           return (
@@ -73,7 +74,7 @@ export function TimeSelector({ value, onChange }: TimeSelectorProps) {
               key={preset.label}
               type="button"
               onClick={() => handlePreset(preset.hours)}
-              className={`segmented-pill ${isSelected ? 'segmented-pill-active' : ''}`}
+              className={`${styles.pill} ${isSelected ? styles.pillActive : ''}`}
             >
               {preset.label}
             </button>
@@ -82,7 +83,7 @@ export function TimeSelector({ value, onChange }: TimeSelectorProps) {
         <button
           type="button"
           onClick={handleCustomClick}
-          className={`segmented-pill ${selection === 'custom' ? 'segmented-pill-active' : ''}`}
+          className={`${styles.pill} ${selection === 'custom' ? styles.pillActive : ''}`}
         >
           Custom
         </button>
@@ -94,14 +95,14 @@ export function TimeSelector({ value, onChange }: TimeSelectorProps) {
           type="datetime-local"
           min={minDateString}
           onChange={handleCustomChange}
-          className="input"
+          className={styles.customInput}
         />
       )}
 
       {/* Unlocks at line */}
       {value && (
-        <p className="text-sm text-zinc-500">
-          Unlocks at: <span className="text-zinc-300">{formattedUnlockTime}</span>
+        <p className={styles.unlockTime}>
+          Unlocks at: <span className={styles.unlockTimeValue}>{formattedUnlockTime}</span>
         </p>
       )}
     </div>

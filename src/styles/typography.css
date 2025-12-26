@@ -1,0 +1,74 @@
+/**
+ * Typography System
+ * Refined font styles for better readability
+ */
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+/* Labels */
+label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  letter-spacing: -0.008em;
+  line-height: 1.5;
+}
+
+/* Paragraphs */
+p {
+  line-height: 1.7;
+  letter-spacing: -0.011em;
+}
+
+/* Small text */
+small {
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+/* Code/Monospace */
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+}
+
+/* Force inputs and textareas to use the main font */
+input, textarea, select, button {
+  font-family: inherit;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="datetime-local"],
+textarea {
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+

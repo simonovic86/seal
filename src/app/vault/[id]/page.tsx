@@ -14,6 +14,8 @@ import { QRCodeModal } from '@/components/QRCode';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { getFriendlyError } from '@/lib/errors';
 import { getShareableUrl } from '@/lib/share';
+import styles from './page.module.css';
+import '@/styles/shared.css';
 
 type State = 'loading' | 'not_found' | 'locked' | 'ready' | 'unlocking' | 'unlocked' | 'destroyed' | 'error';
 
@@ -114,8 +116,8 @@ export default function VaultPage() {
   // Loading
   if (state === 'loading') {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-zinc-400 border-t-transparent rounded-full" />
+      <main className={styles.mainCentered}>
+        <div className={styles.spinner} />
       </main>
     );
   }
@@ -123,18 +125,18 @@ export default function VaultPage() {
   // Not found
   if (state === 'not_found') {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="card max-w-lg mx-auto p-6 text-center">
-          <div className="icon-container-lg mx-auto mb-4">
-            <svg className="w-8 h-8 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <main className={`${styles.mainCentered} ${styles.main}`}>
+        <div className={`${styles.card} ${styles.cardCenter}`}>
+          <div className={styles.iconContainerLg}>
+            <svg className={`${styles.iconLg} ${styles.iconGray}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-zinc-100 mb-2">Vault Not Found</h1>
-          <p className="text-sm text-zinc-400 mb-6">
+          <h1 className={styles.title}>Vault Not Found</h1>
+          <p className={styles.message}>
             This vault doesn&apos;t exist. Make sure you have the complete shareable link.
           </p>
-          <Link href="/" className="btn-primary inline-flex px-6">
+          <Link href="/" className="btn-primary" style={{ display: 'inline-flex', padding: '0.75rem 1.5rem' }}>
             Create a Vault
           </Link>
         </div>
@@ -145,26 +147,27 @@ export default function VaultPage() {
   // Error
   if (state === 'error') {
     return (
-      <main className="min-h-screen py-12 px-4">
-        <div className="max-w-lg mx-auto mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <main className={styles.main}>
+        <div className={styles.backButtonContainer}>
+          <Link href="/" className={styles.backButton}>
+            <svg className={styles.backIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </Link>
         </div>
-        <div className="card max-w-lg mx-auto p-6 text-center">
-          <div className="icon-container-lg mx-auto mb-4">
-            <svg className="w-8 h-8 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className={`${styles.card} ${styles.cardCenter}`}>
+          <div className={styles.iconContainerLg}>
+            <svg className={`${styles.iconLg} ${styles.iconNeutral}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-zinc-100 mb-2">Unlock Failed</h1>
-          <p className="text-sm text-zinc-500 mb-6">{error}</p>
+          <h1 className={styles.title}>Unlock Failed</h1>
+          <p className={`${styles.message} ${styles.messageMuted}`}>{error}</p>
           <button
             onClick={() => setState('ready')}
-            className="btn-secondary px-6"
+            className="btn-secondary"
+            style={{ padding: '0.75rem 1.5rem' }}
           >
             Try Again
           </button>
@@ -176,21 +179,21 @@ export default function VaultPage() {
   // Locked - show countdown
   if (state === 'locked' && vault) {
     return (
-      <main className="min-h-screen py-12 px-4">
-        <div className="max-w-lg mx-auto mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <main className={styles.main}>
+        <div className={styles.backButtonContainer}>
+          <Link href="/" className={styles.backButton}>
+            <svg className={styles.backIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </Link>
         </div>
-        <div className="card max-w-lg mx-auto p-6">
-          <h2 className="text-xl font-semibold text-zinc-100 mb-2 text-center">
+        <div className={styles.card}>
+          <h2 className={`${styles.title} ${styles.cardCenter}`}>
             Time-Locked Vault
           </h2>
           {vault.destroyAfterRead && (
-            <p className="text-xs text-zinc-400 text-center mb-2">
+            <p className={`${styles.destroyNotice} ${styles.cardCenter}`}>
               This vault will be destroyed after reading
             </p>
           )}
@@ -200,20 +203,20 @@ export default function VaultPage() {
           />
           
           {/* No early access notice */}
-          <div className="card-inner mt-6 p-3">
-            <p className="text-xs text-zinc-500 text-center">
+          <div className={styles.cardInner}>
+            <p className={styles.noticeText}>
               No early access. No payment option. No support ticket.
               <br />
-              <span className="text-zinc-400">Even we can&apos;t unlock it.</span>
+              <span className={styles.noticeEmphasis}>Even we can&apos;t unlock it.</span>
             </p>
           </div>
           
-          <div className="mt-4 pt-4 border-t border-zinc-800/50 flex justify-center">
+          <div className={styles.shareButtonContainer}>
             <button
               onClick={() => setShowQR(true)}
-              className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+              className={styles.shareButton}
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={styles.shareIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
               </svg>
               Share QR
@@ -241,41 +244,43 @@ export default function VaultPage() {
 
     return (
       <>
-      <main className="min-h-screen py-12 px-4">
-        <div className="max-w-lg mx-auto mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <main className={styles.main}>
+        <div className={styles.backButtonContainer}>
+          <Link href="/" className={styles.backButton}>
+            <svg className={styles.backIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
           </Link>
         </div>
-        <div className="card max-w-lg mx-auto p-6 text-center">
-          <div className="icon-container-lg mx-auto mb-4">
-            <svg className="w-8 h-8 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className={`${styles.card} ${styles.cardCenter}`}>
+          <div className={styles.iconContainerLg}>
+            <svg className={`${styles.iconLg} ${styles.iconLight}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-zinc-100 mb-2">Ready to Unlock</h2>
-          <p className="text-sm text-zinc-400 mb-6">
+          <h2 className={styles.title}>Ready to Unlock</h2>
+          <p className={styles.message}>
             This vault can now be opened. Click below to decrypt.
             {vault.destroyAfterRead && (
-              <span className="block mt-2 text-zinc-500">
+              <span className={`${styles.destroyNotice} ${styles.destroyNoticeSubtle}`}>
                 This vault will be destroyed after reading
               </span>
             )}
           </p>
           <button
             onClick={handleUnlockClick}
-            className="btn-primary w-full"
+            className="btn-primary"
+            style={{ width: '100%' }}
           >
             Unlock Vault
           </button>
           <button
             onClick={() => setShowQR(true)}
-            className="btn-ghost w-full mt-3 flex items-center justify-center gap-2"
+            className="btn-ghost"
+            style={{ width: '100%', marginTop: 'var(--space-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-2)' }}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg style={{ width: '1rem', height: '1rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
             Share via QR
@@ -307,11 +312,11 @@ export default function VaultPage() {
   // Unlocking
   if (state === 'unlocking') {
     return (
-      <main className="min-h-screen py-12 px-4">
-        <div className="card max-w-lg mx-auto p-6 text-center">
-          <div className="animate-spin w-12 h-12 border-2 border-zinc-400 border-t-transparent rounded-full mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-zinc-100 mb-2">Unlocking Vault</h2>
-          <p className="text-sm text-zinc-400">{progress}</p>
+      <main className={styles.main}>
+        <div className={`${styles.card} ${styles.cardCenter}`}>
+          <div className={`${styles.spinner} ${styles.spinnerLarge}`} />
+          <h2 className={styles.title}>Unlocking Vault</h2>
+          <p className={styles.progressText}>{progress}</p>
         </div>
       </main>
     );
@@ -322,38 +327,40 @@ export default function VaultPage() {
     return (
       <>
       {ToastComponent}
-      <main className="min-h-screen py-12 px-4">
-        <div className="card max-w-lg mx-auto p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="icon-container-sm">
-              <svg className="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <main className={styles.main}>
+        <div className={styles.card}>
+          <div className={styles.destroyHeader}>
+            <div className={styles.iconContainerSm}>
+              <svg className={styles.iconSm} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
               </svg>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-zinc-100">Vault Destroyed</h2>
-              <p className="text-xs text-zinc-500">This secret cannot be accessed again</p>
+            <div className={styles.destroyInfo}>
+              <h2 className={styles.destroyTitle}>Vault Destroyed</h2>
+              <p className={styles.destroySubtitle}>This secret cannot be accessed again</p>
             </div>
           </div>
-          <div className="card-inner p-4">
-            <p className="text-sm text-zinc-300 whitespace-pre-wrap break-words">{decryptedSecret}</p>
+          <div className={styles.secretContainer}>
+            <p className={styles.secretText}>{decryptedSecret}</p>
           </div>
           <button
             onClick={() => {
               navigator.clipboard.writeText(decryptedSecret || '');
               showToast('Secret copied!');
             }}
-            className="btn-primary w-full mt-6"
+            className="btn-primary"
+            style={{ width: '100%', marginTop: 'var(--space-6)' }}
           >
             Copy Secret
           </button>
-          <p className="mt-4 text-xs text-zinc-500 text-center">
+          <p className={styles.warningText}>
             Save this secret now — it&apos;s gone forever after you leave this page.
           </p>
           <Link 
             href="/" 
-            className="btn-secondary block mt-4 text-center"
+            className="btn-secondary"
+            style={{ display: 'block', marginTop: 'var(--space-4)', textAlign: 'center' }}
           >
             Create New Vault
           </Link>
@@ -367,55 +374,55 @@ export default function VaultPage() {
   return (
     <>
     {ToastComponent}
-    <main className="min-h-screen py-12 px-4">
-      <div className="max-w-lg mx-auto mb-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <main className={styles.main}>
+      <div className={styles.backButtonContainer}>
+        <Link href="/" className={styles.backButton}>
+          <svg className={styles.backIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Back
         </Link>
       </div>
-      <div className="card max-w-lg mx-auto p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="icon-container-sm">
-            <svg className="w-5 h-5 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className={styles.card}>
+        <div className={styles.destroyHeader}>
+          <div className={styles.iconContainerSm}>
+            <svg className={`${styles.iconSm} ${styles.iconLight}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-100">Vault Unlocked</h2>
-            <p className="text-xs text-zinc-500">Decrypted successfully</p>
+          <div className={styles.destroyInfo}>
+            <h2 className={styles.destroyTitle}>Vault Unlocked</h2>
+            <p className={styles.destroySubtitle}>Decrypted successfully</p>
           </div>
         </div>
-        <div className="card-inner p-4">
-          <p className="text-sm text-zinc-300 whitespace-pre-wrap break-words">{decryptedSecret}</p>
+        <div className={styles.secretContainer}>
+          <p className={styles.secretText}>{decryptedSecret}</p>
         </div>
-        <div className="mt-6 flex gap-3">
+        <div className={styles.buttonRow}>
           <button
             onClick={() => {
               navigator.clipboard.writeText(decryptedSecret || '');
               showToast('Secret copied!');
             }}
-            className="btn-primary flex-1"
+            className={`btn-primary ${styles.buttonFlex}`}
           >
             Copy Secret
           </button>
-          <Link href="/" className="btn-secondary flex-1 text-center">
+          <Link href="/" className={`btn-secondary ${styles.buttonFlex}`} style={{ textAlign: 'center' }}>
             Create Vault
           </Link>
         </div>
       </div>
       
       {/* Technology badges */}
-      <div className="max-w-lg mx-auto mt-8 flex flex-wrap justify-center gap-2">
+      <div className={styles.techBadges}>
         <a
           href="https://litprotocol.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="tech-badge"
+          className={styles.techBadge}
         >
-          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <svg className={styles.techIcon} viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
           Lit Protocol

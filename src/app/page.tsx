@@ -7,6 +7,7 @@ import { useToast } from '@/components/Toast';
 import { getAllVaultRefs, VaultRef } from '@/lib/storage';
 import { isUnlockable } from '@/lib/lit';
 import { encodeBackupUrl } from '@/lib/share';
+import styles from './page.module.css';
 
 export default function Home() {
   const [vaults, setVaults] = useState<VaultRef[]>([]);
@@ -33,12 +34,12 @@ export default function Home() {
   return (
     <>
     {ToastComponent}
-    <main className="min-h-screen py-12 px-4">
+    <main className={styles.main}>
       {/* Header */}
-      <header className="max-w-lg mx-auto text-center mb-8">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-zinc-800/80 border border-zinc-700/50 mb-3">
+      <header className={styles.header}>
+        <div className={styles.logoContainer}>
           <svg
-            className="w-6 h-6 text-zinc-300"
+            className={styles.logoIcon}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -51,10 +52,10 @@ export default function Home() {
             />
           </svg>
         </div>
-        <h1 className="text-2xl font-semibold text-zinc-100 mb-1">
+        <h1 className={styles.title}>
           Time-Locked Vault
         </h1>
-        <p className="text-sm text-zinc-500">
+        <p className={styles.subtitle}>
           Encrypt secrets with time-based access control.
         </p>
       </header>
@@ -64,41 +65,41 @@ export default function Home() {
 
       {/* Saved vaults */}
       {!loading && vaults.length > 0 && (
-        <section className="max-w-lg mx-auto mt-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-zinc-300">
+        <section className={styles.vaultsSection}>
+          <div className={styles.vaultsHeader}>
+            <h2 className={styles.vaultsTitle}>
               Your Vaults
             </h2>
               <button
               onClick={handleBackup}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#1a1a1c] border border-zinc-800/50 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700/50 transition-colors"
+              className={styles.backupButton}
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={styles.backupIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
               Backup
             </button>
           </div>
-          <div className="space-y-3">
+          <div className={styles.vaultsList}>
             {vaults.map((vault) => {
               const unlockable = isUnlockable(vault.unlockTime);
               return (
                 <Link
                   key={vault.id}
                   href={`/vault/${vault.id}`}
-                  className="card block p-4 hover:border-zinc-700/50 transition-colors"
+                  className={styles.vaultLink}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
+                  <div className={styles.vaultContent}>
+                    <div className={styles.vaultLeft}>
                       <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
+                        className={`${styles.vaultIconContainer} ${
                           unlockable 
-                            ? 'bg-zinc-800/80 border-zinc-700/50' 
-                            : 'bg-[#1a1a1c] border-zinc-800/50'
+                            ? styles.vaultIconContainerUnlockable 
+                            : styles.vaultIconContainerLocked
                         }`}
                       >
                         <svg
-                          className={`w-5 h-5 ${unlockable ? 'text-zinc-300' : 'text-zinc-500'}`}
+                          className={`${styles.vaultIcon} ${unlockable ? styles.vaultIconUnlockable : styles.vaultIconLocked}`}
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -120,11 +121,11 @@ export default function Home() {
                           )}
                         </svg>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-zinc-100 truncate">
+                      <div className={styles.vaultInfo}>
+                        <p className={styles.vaultName}>
                           {vault.name || `Vault ${vault.id.slice(0, 8)}`}
                         </p>
-                        <p className="text-xs text-zinc-500">
+                        <p className={styles.vaultStatus}>
                           {unlockable
                             ? 'Ready to unlock'
                             : `Unlocks ${new Date(vault.unlockTime).toLocaleDateString()}`}
@@ -132,7 +133,7 @@ export default function Home() {
                       </div>
                     </div>
                     <svg
-                      className="w-5 h-5 text-zinc-600"
+                      className={styles.chevronIcon}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -153,23 +154,23 @@ export default function Home() {
       )}
 
       {/* Footer */}
-      <footer className="max-w-lg mx-auto mt-16 text-center space-y-4">
-        <p className="text-xs text-zinc-500">
+      <footer className={styles.footer}>
+        <p className={styles.footerText}>
           No accounts. No servers. Encrypted in your browser.
         </p>
-        <p className="text-xs text-zinc-600">
+        <p className={styles.footerSubtext}>
           We keep nothing. Verify everything.
         </p>
         
         {/* Technology badges */}
-        <div className="flex flex-wrap justify-center gap-2 pt-2">
+        <div className={styles.techBadges}>
           <a
             href="https://litprotocol.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="tech-badge"
+            className={styles.litBadge}
           >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+            <svg className={styles.litIcon} viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             Lit Protocol

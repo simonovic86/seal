@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { decodeBackupFromHash } from '@/lib/share';
 import { saveVaultRef, getAllVaultRefs, VaultRef } from '@/lib/storage';
+import styles from './page.module.css';
+import '@/styles/shared.css';
 
 type State = 'loading' | 'preview' | 'restoring' | 'done' | 'error';
 
@@ -69,8 +71,8 @@ export default function RestorePage() {
   // Loading
   if (state === 'loading') {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-2 border-zinc-400 border-t-transparent rounded-full" />
+      <main className={styles.mainCentered}>
+        <div className={styles.spinner} />
       </main>
     );
   }
@@ -78,18 +80,19 @@ export default function RestorePage() {
   // Error
   if (state === 'error') {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="card max-w-lg mx-auto p-6 text-center animate-fade-in">
-          <div className="icon-container-lg mx-auto mb-4">
-            <svg className="w-8 h-8 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <main className={`${styles.mainCentered} ${styles.main}`}>
+        <div className={`${styles.card} ${styles.cardCenter}`}>
+          <div className={styles.iconContainerLg}>
+            <svg className={styles.iconLg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-zinc-100 mb-2">Restore Failed</h1>
-          <p className="text-sm text-zinc-500 mb-6">{error}</p>
+          <h1 className={styles.title}>Restore Failed</h1>
+          <p className={styles.message}>{error}</p>
           <Link
             href="/"
-            className="btn-secondary inline-flex px-6"
+            className="btn-secondary"
+            style={{ display: 'inline-flex', padding: '0.75rem 1.5rem' }}
           >
             Go Home
           </Link>
@@ -101,42 +104,42 @@ export default function RestorePage() {
   // Preview
   if (state === 'preview') {
     return (
-      <main className="min-h-screen py-12 px-4">
-        <div className="card max-w-lg mx-auto p-6 animate-fade-in">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="icon-container-md">
-              <svg className="w-6 h-6 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <main className={styles.main}>
+        <div className={styles.card}>
+          <div className={styles.header}>
+            <div className={styles.iconContainerMd}>
+              <svg className={styles.iconMd} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
             </div>
-            <div>
-              <h1 className="text-xl font-semibold text-zinc-100">Restore Vaults</h1>
-              <p className="text-sm text-zinc-500">From backup link</p>
+            <div className={styles.headerInfo}>
+              <h1 className={styles.title}>Restore Vaults</h1>
+              <p className={styles.subtitle}>From backup link</p>
             </div>
           </div>
 
-          <div className="space-y-3 mb-6">
-            <div className="card-inner p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-400">Total in backup</span>
-                <span className="text-sm font-medium text-zinc-100">{vaultsToRestore.length}</span>
+          <div className={styles.stats}>
+            <div className={styles.statCard}>
+              <div className={styles.statRow}>
+                <span className={styles.statLabel}>Total in backup</span>
+                <span className={styles.statValue}>{vaultsToRestore.length}</span>
               </div>
             </div>
 
             {newCount > 0 && (
-              <div className="card-inner p-4 bg-zinc-800/80 border-zinc-700/50">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-300">New vaults to add</span>
-                  <span className="text-sm font-medium text-zinc-100">{newCount}</span>
+              <div className={`${styles.statCard} ${styles.statCardHighlight}`}>
+                <div className={styles.statRow}>
+                  <span className={`${styles.statLabel} ${styles.statLabelHighlight}`}>New vaults to add</span>
+                  <span className={styles.statValue}>{newCount}</span>
                 </div>
               </div>
             )}
 
             {existingCount > 0 && (
-              <div className="card-inner p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-zinc-500">Already exist (skipped)</span>
-                  <span className="text-sm font-medium text-zinc-500">{existingCount}</span>
+              <div className={styles.statCard}>
+                <div className={styles.statRow}>
+                  <span className={`${styles.statLabel} ${styles.statLabelMuted}`}>Already exist (skipped)</span>
+                  <span className={`${styles.statValue} ${styles.statValueMuted}`}>{existingCount}</span>
                 </div>
               </div>
             )}
@@ -145,16 +148,18 @@ export default function RestorePage() {
           {newCount > 0 ? (
             <button
               onClick={handleRestore}
-              className="btn-primary w-full"
+              className="btn-primary"
+              style={{ width: '100%' }}
             >
               Restore {newCount} Vault{newCount !== 1 ? 's' : ''}
             </button>
           ) : (
-            <div className="text-center">
-              <p className="text-sm text-zinc-400 mb-4">All vaults already exist on this device.</p>
+            <div className={styles.noVaultsMessage}>
+              <p className={styles.noVaultsText}>All vaults already exist on this device.</p>
               <Link
                 href="/"
-                className="btn-secondary inline-flex px-6"
+                className="btn-secondary"
+                style={{ display: 'inline-flex', padding: '0.75rem 1.5rem' }}
               >
                 Go to Vaults
               </Link>
@@ -168,11 +173,11 @@ export default function RestorePage() {
   // Restoring
   if (state === 'restoring') {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="card max-w-lg mx-auto p-6 text-center">
-          <div className="animate-spin w-12 h-12 border-2 border-zinc-400 border-t-transparent rounded-full mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-zinc-100 mb-2">Restoring Vaults</h2>
-          <p className="text-sm text-zinc-400">Please wait...</p>
+      <main className={`${styles.mainCentered} ${styles.main}`}>
+        <div className={`${styles.card} ${styles.cardCenter}`}>
+          <div className={`${styles.spinner} ${styles.spinnerLarge}`} />
+          <h2 className={styles.title}>Restoring Vaults</h2>
+          <p className={styles.progressText}>Please wait...</p>
         </div>
       </main>
     );
@@ -180,20 +185,21 @@ export default function RestorePage() {
 
   // Done
   return (
-    <main className="min-h-screen flex items-center justify-center px-4">
-      <div className="card max-w-lg mx-auto p-6 text-center animate-fade-in">
-        <div className="icon-container-lg mx-auto mb-4">
-          <svg className="w-8 h-8 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <main className={`${styles.mainCentered} ${styles.main}`}>
+      <div className={`${styles.card} ${styles.cardCenter}`}>
+        <div className={styles.iconContainerLg}>
+          <svg className={`${styles.iconLg} ${styles.iconMd}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="text-xl font-semibold text-zinc-100 mb-2">Restore Complete!</h1>
-        <p className="text-sm text-zinc-400 mb-6">
+        <h1 className={styles.title}>Restore Complete!</h1>
+        <p className={styles.message}>
           {newCount} vault{newCount !== 1 ? 's' : ''} restored successfully.
         </p>
         <button
           onClick={() => router.push('/')}
-          className="btn-primary w-full"
+          className="btn-primary"
+          style={{ width: '100%' }}
         >
           View Your Vaults
         </button>

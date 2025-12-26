@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import QRCodeLib from 'qrcode';
+import styles from './QRCode.module.css';
 
 interface QRCodeProps {
   value: string;
@@ -28,8 +29,8 @@ export function QRCode({ value, size = 200, className = '' }: QRCodeProps) {
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center bg-zinc-800 rounded-lg ${className}`} style={{ width: size, height: size }}>
-        <p className="text-xs text-zinc-500">QR generation failed</p>
+      <div className={`${styles.errorContainer} ${className}`} style={{ width: size, height: size }}>
+        <p className={styles.errorText}>QR generation failed</p>
       </div>
     );
   }
@@ -37,7 +38,7 @@ export function QRCode({ value, size = 200, className = '' }: QRCodeProps) {
   return (
     <canvas
       ref={canvasRef}
-      className={`rounded-lg ${className}`}
+      className={`${styles.canvas} ${className}`}
     />
   );
 }
@@ -53,30 +54,30 @@ export function QRCodeModal({ url, isOpen, onClose }: QRCodeModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className={styles.modalOverlay}
       onClick={onClose}
     >
       <div 
-        className="bg-[#111113] border border-zinc-800/50 rounded-xl shadow-lg shadow-black/20 p-6 max-w-sm mx-4 animate-fade-in"
+        className={styles.modal}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-zinc-100">Scan to Open</h3>
+        <div className={styles.header}>
+          <h3 className={styles.title}>Scan to Open</h3>
           <button
             onClick={onClose}
-            className="p-1 text-zinc-400 hover:text-zinc-200 transition-colors"
+            className={styles.closeButton}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={styles.closeIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         
-        <div className="flex justify-center mb-4">
+        <div className={styles.qrContainer}>
           <QRCode value={url} size={240} />
         </div>
         
-        <p className="text-xs text-zinc-500 text-center">
+        <p className={styles.hint}>
           Scan this QR code with your phone to open the vault
         </p>
       </div>

@@ -11,6 +11,8 @@ import { toBase64 } from '@/lib/encoding';
 import { saveVaultRef, VaultRef } from '@/lib/storage';
 import { getShareableUrl } from '@/lib/share';
 import { getFriendlyError } from '@/lib/errors';
+import styles from './CreateVaultForm.module.css';
+import '@/styles/shared.css';
 
 // Maximum vault size (must fit in URL)
 const MAX_VAULT_SIZE = 32 * 1024; // 32KB
@@ -150,10 +152,10 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
     return (
       <>
       {ToastComponent}
-      <div className="card max-w-lg mx-auto p-6 text-center animate-fade-in">
-        <div className="icon-container-lg mx-auto mb-4">
+      <div className={`${styles.card} ${styles.cardCenter}`}>
+        <div className={styles.iconContainerLg}>
           <svg
-            className="w-8 h-8 text-zinc-300"
+            className={styles.icon}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -166,38 +168,38 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
             />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold text-zinc-100 mb-2">
+        <h2 className={styles.successTitle}>
           {createdVault.name ? `"${createdVault.name}"` : 'Vault'} Created!
         </h2>
-        <p className="text-sm text-zinc-400 mb-6">
+        <p className={styles.successMessage}>
           Your secret is locked until {unlockTime?.toLocaleString()}
           {createdVault.destroyAfterRead && (
-            <span className="block mt-1 text-zinc-500">
+            <span className={styles.destroyNotice}>
               This vault will be destroyed after reading
             </span>
           )}
         </p>
 
-        <div className="card-inner p-4 mb-6 text-left">
-          <p className="text-xs text-zinc-500 mb-1">Shareable Link</p>
-          <code className="text-sm text-zinc-300 break-all">
+        <div className={styles.linkContainer}>
+          <p className={styles.linkLabel}>Shareable Link</p>
+          <code className={styles.linkText}>
             {getVaultUrl()}
           </code>
         </div>
 
-        <div className="flex gap-3">
+        <div className={styles.buttonRow}>
           <button
             onClick={handleCopy}
-            className="btn-primary flex-1"
+            className={`btn-primary ${styles.buttonFlex}`}
           >
             Copy Link
           </button>
           <button
             onClick={() => setShowQR(true)}
-            className="btn-secondary px-4"
+            className={`btn-secondary ${styles.qrButton}`}
             title="Show QR Code"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={styles.qrIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
             </svg>
           </button>
@@ -205,7 +207,7 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
         
         <button
           onClick={handleReset}
-          className="btn-ghost w-full mt-3"
+          className={`btn-ghost ${styles.doneButton}`}
         >
           Done — Create Another
         </button>
@@ -217,34 +219,34 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
         />
 
         {/* Verification badges */}
-        <div className="mt-6 pt-4 border-t border-zinc-800/50">
-          <div className="grid grid-cols-1 gap-2 text-left mb-4">
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className={styles.verificationSection}>
+          <div className={styles.verificationList}>
+            <div className={styles.verificationItem}>
+              <svg className={styles.checkIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-zinc-400">Encrypted in your browser</span>
+              <span className={styles.verificationText}>Encrypted in your browser</span>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={styles.verificationItem}>
+              <svg className={styles.checkIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-zinc-400">Stored in shareable link (no external service)</span>
+              <span className={styles.verificationText}>Stored in shareable link (no external service)</span>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={styles.verificationItem}>
+              <svg className={styles.checkIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-zinc-400">Time-locked via Lit Protocol</span>
+              <span className={styles.verificationText}>Time-locked via Lit Protocol</span>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <svg className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className={styles.verificationItem}>
+              <svg className={styles.checkIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-zinc-400">Zero server storage</span>
+              <span className={styles.verificationText}>Zero server storage</span>
             </div>
           </div>
-          <p className="text-xs text-zinc-600 text-center">
+          <p className={styles.verificationFooter}>
             No early access — not for anyone, including us.
           </p>
         </div>
@@ -264,51 +266,51 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
     };
 
     return (
-      <div className="card max-w-lg mx-auto p-6 animate-fade-in">
-        <h2 className="text-xl font-semibold text-zinc-100 mb-6 text-center">
+      <div className={styles.card}>
+        <h2 className={styles.progressTitle}>
           Creating Vault
         </h2>
         
-        <div className="space-y-3">
+        <div className={styles.progressSteps}>
           {PROGRESS_STEPS.map((progressStep) => {
             const status = getStepStatus(progressStep.id);
+            const stepClass = status === 'active' 
+              ? styles.progressStepActive 
+              : status === 'done'
+              ? styles.progressStepDone
+              : styles.progressStepPending;
+            
             return (
               <div
                 key={progressStep.id}
-                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                  status === 'active' 
-                    ? 'bg-zinc-800/80 border border-zinc-700/50' 
-                    : status === 'done'
-                    ? 'bg-zinc-800/30'
-                    : 'opacity-40'
-                }`}
+                className={`${styles.progressStep} ${stepClass}`}
               >
                 {/* Status icon */}
-                <div className="flex-shrink-0">
+                <div className={styles.progressIcon}>
                   {status === 'done' ? (
-                    <div className="w-5 h-5 rounded-full bg-zinc-700 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className={styles.progressIconDone}>
+                      <svg className={styles.progressIconDoneCheck} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                   ) : status === 'active' ? (
-                    <div className="w-5 h-5 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+                    <div className={styles.progressIconActive} />
                   ) : (
-                    <div className="w-5 h-5 rounded-full border border-zinc-600" />
+                    <div className={styles.progressIconPending} />
                   )}
                 </div>
                 
                 {/* Label and endpoint */}
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium ${
-                    status === 'active' ? 'text-zinc-100' : 
-                    status === 'done' ? 'text-zinc-400' : 'text-zinc-500'
+                <div className={styles.progressContent}>
+                  <p className={`${styles.progressLabel} ${
+                    status === 'active' ? styles.progressLabelActive : 
+                    status === 'done' ? styles.progressLabelDone : styles.progressLabelPending
                   }`}>
                     {progressStep.label}
                   </p>
                   {progressStep.endpoint && (
-                    <p className={`text-xs ${
-                      status === 'active' ? 'text-zinc-400' : 'text-zinc-600'
+                    <p className={`${styles.progressEndpoint} ${
+                      status === 'active' ? styles.progressEndpointActive : styles.progressEndpointInactive
                     }`}>
                       → {progressStep.endpoint}
                     </p>
@@ -319,7 +321,7 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
           })}
         </div>
 
-        <p className="text-xs text-zinc-500 text-center mt-6">
+        <p className={styles.progressFooter}>
           No data is sent to our servers
         </p>
       </div>
@@ -328,16 +330,16 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
 
   // Input form
   return (
-    <div className="card max-w-lg mx-auto p-6">
-      <h2 className="text-xl font-semibold text-zinc-100 mb-6">
+    <div className={styles.card}>
+      <h2 className={styles.heading}>
         Lock Your Secret
       </h2>
 
-      <div className="space-y-6">
+      <div className={styles.form}>
         {/* Vault name */}
-        <div>
-          <label className="block text-sm font-medium text-zinc-300 mb-2">
-            Vault name <span className="text-zinc-500 font-normal">(optional)</span>
+        <div className={styles.field}>
+          <label className={styles.fieldLabel}>
+            Vault name <span className={styles.optionalText}>(optional)</span>
           </label>
           <input
             type="text"
@@ -345,13 +347,13 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
             onChange={(e) => setVaultName(e.target.value)}
             placeholder="e.g., Birthday message for Mom"
             maxLength={100}
-            className="input"
+            className={styles.input}
           />
         </div>
 
         {/* Text input */}
-        <div>
-          <label className="block text-sm font-medium text-zinc-300 mb-2">
+        <div className={styles.field}>
+          <label className={styles.fieldLabel}>
             Secret message
           </label>
           <textarea
@@ -359,10 +361,10 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
             onChange={(e) => setSecretText(e.target.value)}
             placeholder="Enter your secret..."
             rows={4}
-            className={`input resize-none ${tooLarge ? 'border-red-500' : ''}`}
+            className={`${styles.input} ${styles.textarea} ${tooLarge ? styles.inputError : ''}`}
           />
           {hasContent && (
-            <p className={`mt-1.5 text-xs ${tooLarge ? 'text-red-400' : 'text-zinc-500'}`}>
+            <p className={`${styles.hint} ${tooLarge ? styles.hintError : ''}`}>
               {tooLarge ? (
                 `Too large! Maximum ${Math.floor(MAX_VAULT_SIZE / 1024)}KB (currently ~${Math.floor(estimatedSize / 1024)}KB)`
               ) : (
@@ -376,27 +378,28 @@ export function CreateVaultForm({ onVaultCreated }: CreateVaultFormProps) {
         <TimeSelector value={unlockTime} onChange={setUnlockTime} />
 
         {/* Destroy after read toggle */}
-        <label className="flex items-center gap-3 cursor-pointer">
+        <label className={styles.checkboxLabel}>
           <input
             type="checkbox"
             checked={destroyAfterRead}
             onChange={(e) => setDestroyAfterRead(e.target.checked)}
-            className="w-4 h-4 rounded border-zinc-600 bg-[#1a1a1c] text-zinc-100 focus:ring-1 focus:ring-zinc-500 focus:ring-offset-0"
+            className={styles.checkbox}
           />
           <div>
-            <span className="text-sm text-zinc-300">Destroy after reading</span>
-            <p className="text-xs text-zinc-500">Vault will be deleted after first unlock</p>
+            <span className={styles.checkboxText}>Destroy after reading</span>
+            <p className={styles.checkboxHint}>Vault will be deleted after first unlock</p>
           </div>
         </label>
 
         {/* Error */}
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className={styles.error}>{error}</p>}
 
         {/* Submit */}
         <button
           onClick={handleCreate}
           disabled={!canCreate || tooLarge}
-          className="btn-primary w-full"
+          className="btn-primary"
+          style={{ width: '100%' }}
         >
           Lock Secret
         </button>
