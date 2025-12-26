@@ -449,8 +449,11 @@ export class CreateVaultForm extends Component<CreateVaultFormState> {
       ]);
 
       // Create vault reference
+      const vaultId = globalThis.crypto?.randomUUID?.() || 
+        `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+      
       const vault: VaultRef = {
-        id: crypto.randomUUID(),
+        id: vaultId,
         unlockTime: unlockTimeMs,
         litEncryptedKey: encryptedKey,
         litKeyHash: encryptedKeyHash,

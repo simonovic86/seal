@@ -176,7 +176,8 @@ class HomePage {
     this.vaults.forEach((vault) => {
       const unlockable = isUnlockable(vault.unlockTime);
       const link = document.createElement('a');
-      link.href = `/vault.html?id=${vault.id}#${window.location.hash.slice(1)}`;
+      const hashData = window.location.hash.slice(1) || '';
+      link.href = `/vault.html?id=${vault.id}${hashData ? '#' + hashData : ''}`;
       link.className = styles.vaultLink;
 
       link.innerHTML = `
@@ -188,7 +189,7 @@ class HomePage {
               </svg>
             </div>
             <div class="${styles.vaultInfo}">
-              <p class="${styles.vaultName}">${vault.name || `Vault ${vault.id.slice(0, 8)}`}</p>
+              <p class="${styles.vaultName}">${vault.name || (vault.id ? `Vault ${vault.id.slice(0, 8)}` : 'Vault')}</p>
               <p class="${styles.vaultStatus}">${unlockable ? 'Ready to unlock' : `Unlocks ${new Date(vault.unlockTime).toLocaleDateString()}`}</p>
             </div>
           </div>
