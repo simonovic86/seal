@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quick Vault Test</title>
+</head>
+<body>
+  <h1>Testing Vault Creation</h1>
+  <div id="result"></div>
+  
+  <script type="module">
+    import { generateKey, exportKey, encrypt } from './src/lib/crypto.ts';
+    import { initLit, encryptKeyWithTimelock } from './src/lib/lit.ts';
+    import { toBase64 } from './src/lib/encoding.ts';
+    
+    async function testVaultCreation() {
+      const resultDiv = document.getElementById('result');
+      
+      try {
+        resultDiv.innerHTML = 'Step 1: Generating key...';
+        const key = await generateKey();
+        
+        resultDiv.innerHTML += '<br>Step 2: Encrypting message...';
+        const encrypted = await encrypt('Test secret message', key);
+        const rawKey = await exportKey(key);
+        
+        resultDiv.innerHTML += '<br>Step 3: Initializing Lit Protocol...';
+        await initLit();
+        
+        resultDiv.innerHTML += '<br>Step 4: Time-locking key...';
+        const unlockTime = Date.now() + (60 * 60 * 1000); // 1 hour
+        const { encryptedKey, encryptedKeyHash } = await encryptKeyWithTimelock(rawKey, unlockTime);
+        
+        resultDiv.innerHTML += '<br>Step 5: Creating vault...';
+        const vault = {
+          id: crypto.randomUUID(),
+          unlockTime,
+          litEncryptedKey: encryptedKey,
+          litKeyHash: encryptedKeyHash,
+          createdAt: Date.now(),
+          inlineData: toBase64(encrypted),
+        };
+        
+        resultDiv.innerHTML += `<br><br>✅ SUCCESS! Vault created: ${vault.id}`;
+        resultDiv.innerHTML += `<br>Unlock time: ${new Date(unlockTime).toLocaleString()}`;
+        
+      } catch (err) {
+        resultDiv.innerHTML += `<br><br>❌ ERROR: ${err.message}`;
+        console.error('Full error:', err);
+      }
+    }
+    
+    testVaultCreation();
+  </script>
+</body>
+</html>
+

@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 export default defineConfig({
+  plugins: [nodePolyfills()],
   build: {
     target: 'es2020',
     outDir: 'dist',
@@ -18,13 +20,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      crypto: 'crypto-browserify',
-      stream: 'stream-browserify',
-      buffer: 'buffer',
     },
   },
   define: {
     'process.env': {},
+    'process.version': JSON.stringify('v18.0.0'),
     global: 'globalThis',
   },
   optimizeDeps: {
@@ -33,6 +33,7 @@ export default defineConfig({
         global: 'globalThis',
       },
     },
+    include: ['buffer'],
   },
   server: {
     port: 3000,
