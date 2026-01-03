@@ -185,6 +185,21 @@
   color: var(--zinc-300);
   white-space: pre-wrap;
   word-break: break-word;
+  line-height: 1.8;
+}
+
+/* Subtle link styling within secret content */
+.secretText a {
+  color: var(--zinc-400);
+  text-decoration: underline;
+  text-decoration-color: var(--zinc-600);
+  text-underline-offset: 2px;
+  transition: color var(--transition-base), text-decoration-color var(--transition-base);
+}
+
+.secretText a:hover {
+  color: var(--zinc-200);
+  text-decoration-color: var(--zinc-400);
 }
 
 .buttonRow {

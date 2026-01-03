@@ -4,6 +4,7 @@
 
 import './polyfills';
 import './styles/globals.css';
+import './styles/shared.css';
 import { CreateVaultForm } from './components-vanilla/CreateVaultForm';
 import { getAllVaultRefs, VaultRef } from './lib/storage';
 import { isUnlockable } from './lib/lit';

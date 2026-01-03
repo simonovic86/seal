@@ -83,6 +83,7 @@
   transition: all var(--transition-base);
   letter-spacing: -0.008em;
   line-height: 1;
+  text-decoration: none;
 }
 
 .btn-secondary:hover:not(:disabled) {
