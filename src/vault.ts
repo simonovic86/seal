@@ -347,17 +347,38 @@ class VaultPage {
   }
 
   /**
-   * Renders secret content with URI detection.
-   * Lines matching URI pattern (scheme://...) are rendered as clickable links.
+   * Renders decrypted secret content to the DOM.
+   *
+   * INTENTIONALLY MINIMAL - This renderer is deliberately "dumb":
+   * - No JSON parsing or structured data interpretation
+   * - No schema detection or content classification
+   * - No special handling based on URI scheme (vault://, https://, etc.)
+   * - No payload validation or transformation
+   *
+   * The only "smart" behavior is URI detection for clickability, which:
+   * - Treats URIs as opaque strings (scheme://anything)
+   * - Does NOT validate, resolve, or follow links automatically
+   * - Does NOT interpret or index URI content
+   *
+   * Payload interpretation, linking, and semantic understanding are
+   * explicitly OUT OF SCOPE for this renderer. Any such features belong
+   * in a separate layer that consumers can opt into.
+   *
+   * This keeps the vault display predictable, secure, and future-proof.
    */
   private renderSecretContent(container: HTMLElement, content: string): void {
+    // Simple line-by-line processing - no parsing, no structure detection
     const lines = content.split('\n');
-    // URI pattern: scheme (letter followed by letters/digits/+/./-)
-    // followed by :// and any non-whitespace
+
+    // URI pattern: any valid scheme followed by ://
+    // Intentionally permissive - we don't validate or classify schemes
     const uriPattern = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/\S+$/;
 
     lines.forEach((line, index) => {
       const trimmed = line.trim();
+
+      // Binary choice: URI line becomes a link, everything else is text
+      // No special cases, no content sniffing, no conditional behavior
       if (trimmed && uriPattern.test(trimmed)) {
         const link = document.createElement('a');
         link.href = trimmed;
@@ -366,10 +387,11 @@ class VaultPage {
         link.rel = 'noopener noreferrer';
         container.appendChild(link);
       } else {
+        // Preserve original line (including whitespace) as plain text
         container.appendChild(document.createTextNode(line));
       }
 
-      // Add line break between lines (not after the last one)
+      // Line breaks between lines, nothing fancy
       if (index < lines.length - 1) {
         container.appendChild(document.createElement('br'));
       }
