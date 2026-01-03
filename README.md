@@ -1,105 +1,73 @@
 # Lock
 
-Lock lets you seal something until a specific time — and only then reveal it.
-
-No accounts.  
-No backend.  
-No recovery.  
-
-Just a link.
+Time-locked encryption for the browser.
 
 ---
 
 ## What it does
 
-- You create a vault.
-- You choose a time.
+Lock creates encrypted vaults that cannot be opened until a specified time.
+
+- You write something.
+- You choose when it unlocks.
 - You get a URL.
 
-Before the time:  
-→ nothing unlocks.
-
-After the time:  
-→ the content is revealed.
-
-That’s it.
+Before the unlock time, the content is inaccessible.  
+After the unlock time, anyone with the URL can decrypt it.
 
 ---
 
 ## What you can lock
 
-Anything that fits in text.
+Plain text.
 
-- Secrets
-- Instructions
-- URLs
-- Other Lock vaults
-- Any URI (`https://`, `mailto:`, `ipfs://`, etc.)
-
-Lock does not interpret the content.  
-It only unlocks it.
+The content is treated as an opaque string. Lock does not parse, validate, or interpret what you write. If a line looks like a URI, it renders as a clickable link. Otherwise, it renders as text.
 
 ---
 
-## Why this is interesting
+## How it behaves
 
-A vault doesn’t have to reveal text.
+**Creating a vault:**
+1. Enter your content and unlock time.
+2. Review the draft (encrypted locally, not yet committed).
+3. Arm the vault (irreversible — creates the time-lock and saves).
 
-It can reveal **links**.
+**Opening a vault:**
+- Before unlock time: countdown displayed, content inaccessible.
+- After unlock time: content decrypted and displayed.
 
-And those links can point to:
-- other vaults
-- other times
-- other places
+**No accounts. No backend. No recovery.**
 
-Which means you can create:
-- chains
-- branches
-- staged disclosures
-
-Without Lock knowing or caring.
-
-There is no graph.
-There is no workflow.
-There is no state.
-
-It just unlocks what you sealed.
+Vaults exist only as URLs and local references. If you lose the link, the content is gone.
 
 ---
 
-## How it works
-
-- Encryption happens client-side.
-- Time-locking is enforced cryptographically.
-- The URL itself is the capability.
-
-If you have the link, and the time has passed, it opens.
-
----
-
-## What Lock is not
+## What it is not
 
 - Not a password manager
-- Not a workflow engine
-- Not a dashboard
-- Not a platform
+- Not a scheduling tool
+- Not a messaging platform
+- Not a workflow system
 
-It’s a primitive.
+Lock does one thing: seal content until a time, then unseal it.
+
+---
+
+## Technical notes
+
+- Encryption: AES-GCM, client-side
+- Time-lock: Lit Protocol threshold cryptography
+- Storage: Browser localStorage for vault references
+- No server-side storage of content or keys
 
 ---
 
 ## Status
 
-This is an early project.
-
-The surface area is intentionally small.
-The behavior is intentionally boring.
-
-The interesting part is what people do with it.
+Functional. The feature set is intentionally minimal.
 
 ---
 
 ## Philosophy
 
-> We unlock information.  
-> What you do next is up to you.
+Information sealed until its time. Nothing more.
