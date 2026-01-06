@@ -5,6 +5,7 @@
 import './polyfills';
 import './styles/globals.css';
 import './styles/shared.css';
+import './components-vanilla/Toast'; // Side-effect: registers toast event listener
 import { CreateVaultForm } from './components-vanilla/CreateVaultForm';
 import { getAllVaultRefs, getAllVaultIds, saveVaultRef, VaultRef } from './lib/storage';
 import { isUnlockable } from './lib/lit';

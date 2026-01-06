@@ -217,16 +217,16 @@ function buildLitConditions(unlockTimestamp: number): VEFLitCondition[] {
  */
 export function validateVaultForExport(vault: VaultRef): string | null {
   if (!vault.inlineData) {
-    return 'Vault missing encrypted data (inlineData)';
+    return 'Vault is incomplete (missing encrypted data)';
   }
   if (!vault.litEncryptedKey) {
-    return 'Vault missing Lit encrypted key';
+    return 'Vault is incomplete (missing time-lock key)';
   }
   if (!vault.litKeyHash) {
-    return 'Vault missing Lit key hash';
+    return 'Vault is incomplete (missing key hash)';
   }
   if (!vault.unlockTime || vault.unlockTime <= 0) {
-    return 'Vault missing unlock time';
+    return 'Vault is incomplete (missing unlock time)';
   }
   return null;
 }
