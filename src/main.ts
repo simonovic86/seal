@@ -7,6 +7,7 @@ import './styles/globals.css';
 import './styles/shared.css';
 import './components-vanilla/Toast'; // Side-effect: registers toast event listener
 import { CreateVaultForm } from './components-vanilla/CreateVaultForm';
+import { confirm } from './components-vanilla/ConfirmModal';
 import { getAllVaultRefs, getAllVaultIds, saveVaultRef, VaultRef } from './lib/storage';
 import { isUnlockable } from './lib/lit';
 import { eventBus } from './lib/component';
@@ -232,6 +233,17 @@ class HomePage {
   }
 
   private async handleImportVault(): Promise<void> {
+    // Check if user has existing vaults
+    if (this.vaults.length > 0) {
+      const confirmed = await confirm(
+        'Import Vaults',
+        `You have ${this.vaults.length} existing vault${this.vaults.length !== 1 ? 's' : ''}. Duplicates will be skipped.`,
+        'Continue',
+        'Cancel',
+      );
+      if (!confirmed) return;
+    }
+
     // Create hidden file input
     const input = document.createElement('input');
     input.type = 'file';
