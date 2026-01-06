@@ -61,42 +61,11 @@ class HomePage {
     const header = document.createElement('header');
     header.className = styles.header;
 
-    const logoContainer = document.createElement('div');
-    logoContainer.className = styles.logoContainer;
-
-    const logoSvg = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'svg',
-    );
-    logoSvg.setAttribute('class', styles.logoIcon);
-    logoSvg.setAttribute('fill', 'none');
-    logoSvg.setAttribute('stroke', 'currentColor');
-    logoSvg.setAttribute('viewBox', '0 0 24 24');
-    const logoPath = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'path',
-    );
-    logoPath.setAttribute('stroke-linecap', 'round');
-    logoPath.setAttribute('stroke-linejoin', 'round');
-    logoPath.setAttribute('stroke-width', '1.5');
-    logoPath.setAttribute(
-      'd',
-      'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
-    );
-    logoSvg.appendChild(logoPath);
-    logoContainer.appendChild(logoSvg);
-
     const title = document.createElement('h1');
     title.className = styles.title;
-    title.textContent = 'Time-Locked Vault';
+    title.textContent = 'Seal';
 
-    const subtitle = document.createElement('p');
-    subtitle.className = styles.subtitle;
-    subtitle.textContent = 'Encrypt secrets with time-based access control.';
-
-    header.appendChild(logoContainer);
     header.appendChild(title);
-    header.appendChild(subtitle);
 
     return header;
   }
@@ -104,14 +73,6 @@ class HomePage {
   private createFooter(): HTMLElement {
     const footer = document.createElement('footer');
     footer.className = styles.footer;
-
-    const text1 = document.createElement('p');
-    text1.className = styles.footerText;
-    text1.textContent = 'No accounts. No servers. Encrypted in your browser.';
-
-    const text2 = document.createElement('p');
-    text2.className = styles.footerSubtext;
-    text2.textContent = 'We keep nothing. Verify everything.';
 
     const badges = document.createElement('div');
     badges.className = styles.techBadges;
@@ -129,8 +90,6 @@ class HomePage {
     `;
     badges.appendChild(litBadge);
 
-    footer.appendChild(text1);
-    footer.appendChild(text2);
     footer.appendChild(badges);
 
     return footer;
@@ -163,7 +122,7 @@ class HomePage {
 
     const title = document.createElement('h2');
     title.className = styles.vaultsTitle;
-    title.textContent = 'Your Vaults';
+    title.textContent = 'Vaults';
 
     const buttonGroup = document.createElement('div');
     buttonGroup.className = styles.buttonGroup;

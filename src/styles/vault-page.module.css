@@ -19,7 +19,7 @@
 
 .backButtonContainer {
   max-width: 32rem;
-  margin: 0 auto var(--space-8);
+  margin: 0 auto var(--space-4);
 }
 
 .backButton {
@@ -115,7 +115,7 @@
 .message {
   font-size: var(--text-sm);
   color: var(--zinc-400);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
 }
 
 .messageMuted {
@@ -138,7 +138,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-3);
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
 }
 
 .noticeText {
@@ -212,7 +212,7 @@
 .buttonRow {
   display: flex;
   gap: var(--space-3);
-  margin-top: var(--space-6);
+  margin-top: var(--space-4);
 }
 
 @media (max-width: 360px) {
@@ -236,7 +236,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
 }
 
 .iconContainerSm {
@@ -274,7 +274,7 @@
 .techBadges {
   max-width: 32rem;
   margin: 0 auto;
-  margin-top: var(--space-8);
+  margin-top: var(--space-6);
   display: flex;
   flex-wrap: wrap;
   justify-content: center;

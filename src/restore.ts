@@ -96,14 +96,8 @@ class RestorePage {
     const card = document.createElement('div');
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
-      <div class="${styles.iconContainerLg}">
-        <svg class="${styles.iconLg}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </div>
-      <h1 class="${styles.title}">Restore Failed</h1>
-      <p class="${styles.message}">${this.error || 'An error occurred'}</p>
-      <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Go Home</a>
+      <p class="${styles.message}">${this.error || 'Restore failed'}</p>
+      <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Back</a>
     `;
     main.appendChild(card);
   }
@@ -113,34 +107,8 @@ class RestorePage {
     const card = document.createElement('div');
     card.className = styles.card;
 
-    const header = document.createElement('div');
-    header.className = styles.header;
-    header.innerHTML = `
-      <div class="${styles.iconContainerMd}">
-        <svg class="${styles.iconMd}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-        </svg>
-      </div>
-      <div class="${styles.headerInfo}">
-        <h1 class="${styles.title}">Restore Vaults</h1>
-        <p class="${styles.subtitle}">From backup link</p>
-      </div>
-    `;
-    card.appendChild(header);
-
     const stats = document.createElement('div');
     stats.className = styles.stats;
-
-    // Total
-    const totalCard = document.createElement('div');
-    totalCard.className = styles.statCard;
-    totalCard.innerHTML = `
-      <div class="${styles.statRow}">
-        <span class="${styles.statLabel}">Total in backup</span>
-        <span class="${styles.statValue}">${this.vaultsToRestore.length}</span>
-      </div>
-    `;
-    stats.appendChild(totalCard);
 
     // New vaults
     if (this.newCount > 0) {
@@ -148,8 +116,7 @@ class RestorePage {
       newCard.className = `${styles.statCard} ${styles.statCardHighlight}`;
       newCard.innerHTML = `
         <div class="${styles.statRow}">
-          <span class="${styles.statLabel} ${styles.statLabelHighlight}">New vaults to add</span>
-          <span class="${styles.statValue}">${this.newCount}</span>
+          <span class="${styles.statLabel} ${styles.statLabelHighlight}">${this.newCount} new</span>
         </div>
       `;
       stats.appendChild(newCard);
@@ -161,8 +128,7 @@ class RestorePage {
       existingCard.className = styles.statCard;
       existingCard.innerHTML = `
         <div class="${styles.statRow}">
-          <span class="${styles.statLabel} ${styles.statLabelMuted}">Already exist (skipped)</span>
-          <span class="${styles.statValue} ${styles.statValueMuted}">${this.existingCount}</span>
+          <span class="${styles.statLabel} ${styles.statLabelMuted}">${this.existingCount} already exist</span>
         </div>
       `;
       stats.appendChild(existingCard);
@@ -175,15 +141,15 @@ class RestorePage {
       const restoreBtn = document.createElement('button');
       restoreBtn.className = 'btn-primary';
       restoreBtn.style.width = '100%';
-      restoreBtn.textContent = `Restore ${this.newCount} Vault${this.newCount !== 1 ? 's' : ''}`;
+      restoreBtn.textContent = `Restore`;
       restoreBtn.addEventListener('click', () => this.handleRestore());
       card.appendChild(restoreBtn);
     } else {
       const noVaults = document.createElement('div');
       noVaults.className = styles.noVaultsMessage;
       noVaults.innerHTML = `
-        <p class="${styles.noVaultsText}">All vaults already exist on this device.</p>
-        <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Go to Vaults</a>
+        <p class="${styles.noVaultsText}">All vaults already exist.</p>
+        <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Back</a>
       `;
       card.appendChild(noVaults);
     }
@@ -197,8 +163,6 @@ class RestorePage {
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
       <div class="${styles.spinner} ${styles.spinnerLarge}"></div>
-      <h2 class="${styles.title}">Restoring Vaults</h2>
-      <p class="${styles.progressText}">Please wait...</p>
     `;
     main.appendChild(card);
   }
@@ -209,20 +173,17 @@ class RestorePage {
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
       <div class="${styles.iconContainerLg}">
-        <svg class="${styles.iconLg} ${styles.iconMd}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="${styles.iconLg}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <h1 class="${styles.title}">Restore Complete!</h1>
-      <p class="${styles.message}">
-        ${this.newCount} vault${this.newCount !== 1 ? 's' : ''} restored successfully.
-      </p>
+      <p class="${styles.message}">${this.newCount} restored</p>
     `;
 
     const viewBtn = document.createElement('button');
     viewBtn.className = 'btn-primary';
     viewBtn.style.width = '100%';
-    viewBtn.textContent = 'View Your Vaults';
+    viewBtn.textContent = 'Done';
     viewBtn.addEventListener('click', () => {
       window.location.href = './';
     });

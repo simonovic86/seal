@@ -127,14 +127,8 @@ class VaultPage {
     const card = document.createElement('div');
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
-      <div class="${styles.iconContainerLg}">
-        <svg class="${styles.iconLg} ${styles.iconGray}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <h1 class="${styles.title}">Vault Not Found</h1>
-      <p class="${styles.message}">This vault doesn't exist. Make sure you have the complete shareable link.</p>
-      <a href="./" class="btn-primary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Create a Vault</a>
+      <p class="${styles.message}">Vault not found</p>
+      <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Back</a>
     `;
     main.appendChild(card);
   }
@@ -146,12 +140,6 @@ class VaultPage {
     const card = document.createElement('div');
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
-      <div class="${styles.iconContainerLg}">
-        <svg class="${styles.iconLg} ${styles.iconNeutral}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </div>
-      <h1 class="${styles.title}">Unlock Failed</h1>
       <p class="${styles.message} ${styles.messageMuted}">${this.error || 'An error occurred'}</p>
     `;
 
@@ -177,15 +165,10 @@ class VaultPage {
     const card = document.createElement('div');
     card.className = styles.card;
 
-    const title = document.createElement('h2');
-    title.className = `${styles.title} ${styles.cardCenter}`;
-    title.textContent = 'Time-Locked Vault';
-    card.appendChild(title);
-
     if (this.vault.destroyAfterRead) {
       const notice = document.createElement('p');
       notice.className = `${styles.destroyNotice} ${styles.cardCenter}`;
-      notice.textContent = 'This vault will be destroyed after reading';
+      notice.textContent = 'Destroyed after reading';
       card.appendChild(notice);
     }
 
@@ -202,10 +185,7 @@ class VaultPage {
     const noticeCard = document.createElement('div');
     noticeCard.className = styles.cardInner;
     noticeCard.innerHTML = `
-      <p class="${styles.noticeText}">
-        No early access. No payment option. No support ticket.<br />
-        <span class="${styles.noticeEmphasis}">Even we can't unlock it.</span>
-      </p>
+      <p class="${styles.noticeText}">No early access. Even we can't unlock it.</p>
     `;
     card.appendChild(noticeCard);
 
@@ -226,17 +206,13 @@ class VaultPage {
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
         </svg>
       </div>
-      <h2 class="${styles.title}">Ready to Unlock</h2>
-      <p class="${styles.message}">
-        This vault can now be opened. Click below to decrypt.
-        ${this.vault.destroyAfterRead ? `<span class="${styles.destroyNotice} ${styles.destroyNoticeSubtle}">This vault will be destroyed after reading</span>` : ''}
-      </p>
+      ${this.vault.destroyAfterRead ? `<p class="${styles.destroyNotice}">Destroyed after reading</p>` : ''}
     `;
 
     const unlockBtn = document.createElement('button');
     unlockBtn.className = 'btn-primary';
     unlockBtn.style.width = '100%';
-    unlockBtn.textContent = 'Unlock Vault';
+    unlockBtn.textContent = 'Unlock';
     unlockBtn.addEventListener('click', () => this.handleUnlockClick());
     card.appendChild(unlockBtn);
 
@@ -249,7 +225,6 @@ class VaultPage {
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
       <div class="${styles.spinner} ${styles.spinnerLarge}"></div>
-      <h2 class="${styles.title}">Unlocking Vault</h2>
       <p class="${styles.progressText}">${this.progress}</p>
     `;
     main.appendChild(card);
@@ -261,21 +236,6 @@ class VaultPage {
 
     const card = document.createElement('div');
     card.className = styles.card;
-
-    const header = document.createElement('div');
-    header.className = styles.destroyHeader;
-    header.innerHTML = `
-      <div class="${styles.iconContainerSm}">
-        <svg class="${styles.iconSm} ${styles.iconLight}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="${this.state === 'destroyed' ? 'M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z' : 'M5 13l4 4L19 7'}" />
-        </svg>
-      </div>
-      <div class="${styles.destroyInfo}">
-        <h2 class="${styles.destroyTitle}">${this.state === 'destroyed' ? 'Vault Destroyed' : 'Vault Unlocked'}</h2>
-        <p class="${styles.destroySubtitle}">${this.state === 'destroyed' ? 'This secret cannot be accessed again' : 'Decrypted successfully'}</p>
-      </div>
-    `;
-    card.appendChild(header);
 
     const secretContainer = document.createElement('div');
     secretContainer.className = styles.secretContainer;
@@ -290,17 +250,17 @@ class VaultPage {
 
     const copyBtn = document.createElement('button');
     copyBtn.className = `btn-primary ${styles.buttonFlex}`;
-    copyBtn.textContent = 'Copy Secret';
+    copyBtn.textContent = 'Copy';
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(this.decryptedSecret || '');
-      eventBus.emit('toast:show', 'Secret copied!');
+      eventBus.emit('toast:show', 'Copied');
     });
 
     const homeLink = document.createElement('a');
     homeLink.href = './';
     homeLink.className = `btn-secondary ${styles.buttonFlex}`;
     homeLink.style.textAlign = 'center';
-    homeLink.textContent = 'Create Vault';
+    homeLink.textContent = 'Back';
 
     buttonRow.appendChild(copyBtn);
     buttonRow.appendChild(homeLink);
@@ -309,25 +269,11 @@ class VaultPage {
     if (this.state === 'destroyed') {
       const warning = document.createElement('p');
       warning.className = styles.warningText;
-      warning.textContent =
-        "Save this secret now — it's gone forever after you leave this page.";
+      warning.textContent = "Save now — gone after you leave.";
       card.appendChild(warning);
     }
 
     main.appendChild(card);
-
-    // Tech badges
-    const badges = document.createElement('div');
-    badges.className = styles.techBadges;
-    badges.innerHTML = `
-      <a href="https://litprotocol.com" target="_blank" rel="noopener noreferrer" class="${styles.techBadge}">
-        <svg class="${styles.techIcon}" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Lit Protocol
-      </a>
-    `;
-    main.appendChild(badges);
   }
 
   private addBackButton(main: HTMLElement): void {
