@@ -54,19 +54,3 @@ export async function withRetry<T>(
   throw lastError;
 }
 
-/**
- * Check if an error is likely recoverable (network issues)
- */
-export function isRetryableError(error: Error): boolean {
-  const message = error.message.toLowerCase();
-  return (
-    message.includes('network') ||
-    message.includes('timeout') ||
-    message.includes('fetch') ||
-    message.includes('aborted') ||
-    message.includes('econnreset') ||
-    message.includes('socket') ||
-    message.includes('5') // 5xx errors
-  );
-}
-

@@ -67,10 +67,3 @@ export async function getAllVaultIds(): Promise<Set<string>> {
   return new Set(vaults.map((v) => v.id));
 }
 
-/**
- * Check if a vault with given ID exists
- */
-export async function vaultExists(id: string): Promise<boolean> {
-  const vault = await getVaultRef(id);
-  return vault !== undefined;
-}

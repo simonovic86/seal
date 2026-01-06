@@ -18,35 +18,6 @@ interface ShareableData {
 }
 
 /**
- * Encode vault data for URL hash
- */
-export function encodeVaultForShare(vault: VaultRef): string {
-  const data: ShareableData = {
-    k: vault.litEncryptedKey,
-    h: vault.litKeyHash,
-    t: vault.unlockTime,
-    d: vault.inlineData,
-  };
-
-  if (vault.name) {
-    data.n = vault.name;
-  }
-
-  if (vault.destroyAfterRead) {
-    data.x = true;
-  }
-
-  // Use URL-safe base64
-  const json = JSON.stringify(data);
-  const base64 = btoa(json)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-
-  return base64;
-}
-
-/**
  * Decode vault data from URL hash
  */
 export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
@@ -90,36 +61,6 @@ export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
   }
 }
 
-/**
- * Get the base path for the current deployment (handles IPFS, subdirectories, etc.)
- */
-function getBasePath(): string {
-  if (typeof window === 'undefined') return '';
-  // Get everything up to and including the last /
-  const path = window.location.pathname;
-  const lastSlash = path.lastIndexOf('/');
-  const dir = lastSlash >= 0 ? path.slice(0, lastSlash + 1) : '/';
-  return window.location.origin + dir;
-}
-
-/**
- * Get full shareable URL for a vault
- */
-export function getShareableUrl(vault: VaultRef): string {
-  const base = getBasePath();
-  const hash = encodeVaultForShare(vault);
-  return `${base}vault.html?id=${vault.id}#${hash}`;
-}
-
-/**
- * Check if current URL has vault data in hash
- */
-export function hasVaultDataInHash(): boolean {
-  if (typeof window === 'undefined') return false;
-  const hash = window.location.hash;
-  return hash.length > 10; // Minimum reasonable length for encoded data
-}
-
 // Compact format for backup bundle
 interface BackupVaultData extends ShareableData {
   id: string;
@@ -129,34 +70,6 @@ interface BackupVaultData extends ShareableData {
 interface BackupBundle {
   v: 1; // version
   vaults: BackupVaultData[];
-}
-
-/**
- * Encode all vaults into a backup URL
- */
-export function encodeBackupUrl(vaults: VaultRef[]): string {
-  const bundle: BackupBundle = {
-    v: 1,
-    vaults: vaults.map((vault) => ({
-      id: vault.id,
-      k: vault.litEncryptedKey,
-      h: vault.litKeyHash,
-      t: vault.unlockTime,
-      c: vault.createdAt || undefined,
-      n: vault.name,
-      d: vault.inlineData,
-      x: vault.destroyAfterRead,
-    })),
-  };
-
-  const json = JSON.stringify(bundle);
-  const base64 = btoa(json)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
-
-  const base = getBasePath();
-  return `${base}restore.html#${base64}`;
 }
 
 /**

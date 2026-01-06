@@ -11,7 +11,7 @@ import { getVaultRef, deleteVaultRef, VaultRef } from './lib/storage';
 import { fromBase64 } from './lib/encoding';
 import { initLit, decryptKey, isUnlockable } from './lib/lit';
 import { importKey, decryptToString } from './lib/crypto';
-import { decodeVaultFromHash, getShareableUrl } from './lib/share';
+import { decodeVaultFromHash } from './lib/share';
 import { getFriendlyError } from './lib/errors';
 import { eventBus } from './lib/component';
 import styles from './styles/vault-page.module.css';

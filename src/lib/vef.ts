@@ -515,18 +515,6 @@ export function parseVEF(jsonString: string): VEFValidationResult {
 }
 
 /**
- * Parse and validate a VEF from a File object
- */
-export async function parseVEFFromFile(file: File): Promise<VEFValidationResult> {
-  try {
-    const text = await file.text();
-    return parseVEF(text);
-  } catch (e) {
-    return { valid: false, error: `Failed to read file: ${(e as Error).message}` };
-  }
-}
-
-/**
  * Get vault status based on unlock timestamp
  */
 export function getVaultStatus(unlockTimestamp: number): VaultStatus {
@@ -611,37 +599,6 @@ export async function restoreVaultFromVEF(
       error: (e as Error).message,
     };
   }
-}
-
-// =============================================================================
-// Multi-Vault Export (ZIP)
-// =============================================================================
-
-/**
- * Manifest for ZIP exports
- */
-export interface VEFManifest {
-  vef_version: string;
-  export_timestamp: number;
-  vault_count: number;
-  vault_ids: string[];
-  app_version: string;
-}
-
-/**
- * Create a manifest for multiple vaults
- */
-export function createManifest(
-  vefs: VaultExportFile[],
-  appVersion: string = '0.2.0',
-): VEFManifest {
-  return {
-    vef_version: VEF_VERSION,
-    export_timestamp: Date.now(),
-    vault_count: vefs.length,
-    vault_ids: vefs.map((v) => v.vault_id),
-    app_version: appVersion,
-  };
 }
 
 // =============================================================================

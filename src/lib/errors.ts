@@ -89,11 +89,3 @@ export function getFriendlyError(error: Error): ErrorInfo {
     recoverable: true,
   };
 }
-
-/**
- * Log error with context for debugging
- */
-export function logError(context: string, error: unknown): void {
-  console.error(`[${context}]`, error);
-}
-
