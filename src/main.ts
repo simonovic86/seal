@@ -8,15 +8,14 @@ import './styles/shared.css';
 import { CreateVaultForm } from './components-vanilla/CreateVaultForm';
 import { getAllVaultRefs, getAllVaultIds, saveVaultRef, VaultRef } from './lib/storage';
 import { isUnlockable } from './lib/lit';
-import { encodeBackupUrl } from './lib/share';
 import { eventBus } from './lib/component';
 import {
   downloadVaultExport,
-  parseVEFFromFile,
+  downloadBackupBundle,
+  parseVEFFile,
   createRestorePreview,
   restoreVaultFromVEF,
-  VEFRestorePreview,
-  VaultExportFile,
+  restoreFromBundle,
 } from './lib/vef';
 import styles from './styles/page.module.css';
 
@@ -251,9 +250,14 @@ class HomePage {
   }
 
   private async handleBackup(): Promise<void> {
-    const backupUrl = encodeBackupUrl(this.vaults);
-    await navigator.clipboard.writeText(backupUrl);
-    eventBus.emit('toast:show', 'Backup link copied!');
+    try {
+      const count = await downloadBackupBundle(this.vaults);
+      eventBus.emit('toast:show', `Backed up ${count} vault${count !== 1 ? 's' : ''}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Backup failed';
+      console.error('Backup failed:', err);
+      eventBus.emit('toast:show', message);
+    }
   }
 
   private async handleExportVault(vault: VaultRef): Promise<void> {
@@ -278,40 +282,68 @@ class HomePage {
       const file = input.files?.[0];
       if (!file) return;
 
-      // Parse and validate VEF
-      const result = await parseVEFFromFile(file);
-      if (!result.valid) {
-        eventBus.emit('toast:show', `Invalid file: ${result.error}`);
+      // Parse file (handles both single VEF and backup bundle)
+      const parsed = await parseVEFFile(file);
+
+      if (parsed.type === 'error') {
+        eventBus.emit('toast:show', `Invalid file: ${parsed.error}`);
         return;
       }
 
       // Get existing vault IDs
       const existingIds = await getAllVaultIds();
 
-      // Create preview
-      const preview = await createRestorePreview(result.vef, existingIds);
+      if (parsed.type === 'bundle') {
+        // Handle backup bundle (multiple vaults)
+        const result = await restoreFromBundle(
+          parsed.bundle,
+          existingIds,
+          saveVaultRef,
+        );
 
-      // Show confirmation dialog
-      if (preview.already_exists) {
-        eventBus.emit('toast:show', 'Vault already exists');
-        return;
-      }
+        if (result.restored > 0) {
+          await this.loadVaults();
+        }
 
-      // Restore the vault
-      const restoreResult = await restoreVaultFromVEF(
-        result.vef,
-        existingIds,
-        saveVaultRef,
-      );
+        if (result.errors.length > 0) {
+          console.error('Restore errors:', result.errors);
+        }
 
-      if (restoreResult.success && !restoreResult.skipped) {
-        // Reload vaults and update UI
-        await this.loadVaults();
-        eventBus.emit('toast:show', 'Vault restored!');
-      } else if (restoreResult.skipped) {
-        eventBus.emit('toast:show', 'Vault already exists');
+        const parts: string[] = [];
+        if (result.restored > 0) {
+          parts.push(`${result.restored} restored`);
+        }
+        if (result.skipped > 0) {
+          parts.push(`${result.skipped} skipped`);
+        }
+        if (result.errors.length > 0) {
+          parts.push(`${result.errors.length} failed`);
+        }
+
+        eventBus.emit('toast:show', parts.join(', ') || 'No vaults to restore');
       } else {
-        eventBus.emit('toast:show', `Restore failed: ${restoreResult.error}`);
+        // Handle single VEF
+        const preview = await createRestorePreview(parsed.vef, existingIds);
+
+        if (preview.already_exists) {
+          eventBus.emit('toast:show', 'Vault already exists');
+          return;
+        }
+
+        const restoreResult = await restoreVaultFromVEF(
+          parsed.vef,
+          existingIds,
+          saveVaultRef,
+        );
+
+        if (restoreResult.success && !restoreResult.skipped) {
+          await this.loadVaults();
+          eventBus.emit('toast:show', 'Vault restored!');
+        } else if (restoreResult.skipped) {
+          eventBus.emit('toast:show', 'Vault already exists');
+        } else {
+          eventBus.emit('toast:show', `Restore failed: ${restoreResult.error}`);
+        }
       }
     };
 

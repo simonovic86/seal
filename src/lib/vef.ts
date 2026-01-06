@@ -644,3 +644,231 @@ export function createManifest(
   };
 }
 
+// =============================================================================
+// Backup Bundle (All Vaults)
+// =============================================================================
+
+/**
+ * Backup bundle containing multiple vaults
+ */
+export interface VEFBackupBundle {
+  vef_version: string;
+  bundle_type: 'backup';
+  export_timestamp: number;
+  app_version: string;
+  vaults: VaultExportFile[];
+}
+
+/**
+ * Export all vaults as a backup bundle
+ */
+export async function exportBackupBundle(
+  vaults: VaultRef[],
+  appVersion: string = '0.2.0',
+  litSdkVersion: string = '7.3.1',
+): Promise<VEFBackupBundle> {
+  const vefs: VaultExportFile[] = [];
+  const errors: string[] = [];
+
+  for (const vault of vaults) {
+    const validationError = validateVaultForExport(vault);
+    if (validationError) {
+      errors.push(`${vault.id}: ${validationError}`);
+      continue;
+    }
+
+    try {
+      const vef = await exportVault(vault, appVersion, litSdkVersion);
+      vefs.push(vef);
+    } catch (e) {
+      errors.push(`${vault.id}: ${(e as Error).message}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    console.warn('Some vaults could not be exported:', errors);
+  }
+
+  return {
+    vef_version: VEF_VERSION,
+    bundle_type: 'backup',
+    export_timestamp: Date.now(),
+    app_version: appVersion,
+    vaults: vefs,
+  };
+}
+
+/**
+ * Export backup bundle to JSON string
+ */
+export async function exportBackupBundleToJson(
+  vaults: VaultRef[],
+  appVersion?: string,
+  litSdkVersion?: string,
+): Promise<string> {
+  const bundle = await exportBackupBundle(vaults, appVersion, litSdkVersion);
+  return JSON.stringify(bundle, null, 2);
+}
+
+/**
+ * Get filename for backup bundle
+ */
+export function getBackupFilename(): string {
+  const date = new Date().toISOString().split('T')[0];
+  return `lock-backup-${date}.vef.json`;
+}
+
+/**
+ * Trigger download of backup bundle
+ */
+export async function downloadBackupBundle(vaults: VaultRef[]): Promise<number> {
+  const json = await exportBackupBundleToJson(vaults);
+  const bundle = JSON.parse(json) as VEFBackupBundle;
+
+  if (bundle.vaults.length === 0) {
+    throw new Error('No valid vaults to export');
+  }
+
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = getBackupFilename();
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  return bundle.vaults.length;
+}
+
+/**
+ * Validate and parse a backup bundle
+ */
+export type BackupBundleValidationResult =
+  | { valid: true; bundle: VEFBackupBundle }
+  | { valid: false; error: string };
+
+export function parseBackupBundle(data: unknown): BackupBundleValidationResult {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Invalid backup: not an object' };
+  }
+
+  const bundle = data as Record<string, unknown>;
+
+  if (bundle.bundle_type !== 'backup') {
+    return { valid: false, error: 'Not a backup bundle' };
+  }
+
+  if (typeof bundle.vef_version !== 'string') {
+    return { valid: false, error: 'Missing vef_version' };
+  }
+
+  if (!Array.isArray(bundle.vaults)) {
+    return { valid: false, error: 'Missing vaults array' };
+  }
+
+  // Validate each vault in the bundle
+  const validVaults: VaultExportFile[] = [];
+  const errors: string[] = [];
+
+  for (let i = 0; i < bundle.vaults.length; i++) {
+    const result = validateVEF(bundle.vaults[i]);
+    if (result.valid) {
+      validVaults.push(result.vef);
+    } else {
+      errors.push(`Vault ${i}: ${result.error}`);
+    }
+  }
+
+  if (validVaults.length === 0 && errors.length > 0) {
+    return { valid: false, error: `No valid vaults: ${errors.join('; ')}` };
+  }
+
+  return {
+    valid: true,
+    bundle: {
+      vef_version: bundle.vef_version as string,
+      bundle_type: 'backup',
+      export_timestamp: bundle.export_timestamp as number,
+      app_version: bundle.app_version as string,
+      vaults: validVaults,
+    },
+  };
+}
+
+/**
+ * Parse file as either single VEF or backup bundle
+ */
+export type ParsedVEFFile = 
+  | { type: 'single'; vef: VaultExportFile }
+  | { type: 'bundle'; bundle: VEFBackupBundle }
+  | { type: 'error'; error: string };
+
+export async function parseVEFFile(file: File): Promise<ParsedVEFFile> {
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    // Check if it's a backup bundle
+    if (data.bundle_type === 'backup') {
+      const result = parseBackupBundle(data);
+      if (result.valid) {
+        return { type: 'bundle', bundle: result.bundle };
+      }
+      return { type: 'error', error: result.error };
+    }
+
+    // Try parsing as single VEF
+    const result = validateVEF(data);
+    if (result.valid) {
+      return { type: 'single', vef: result.vef };
+    }
+
+    return { type: 'error', error: result.error };
+  } catch (e) {
+    return { type: 'error', error: `Failed to parse file: ${(e as Error).message}` };
+  }
+}
+
+/**
+ * Restore all vaults from a backup bundle
+ */
+export interface BundleRestoreResult {
+  total: number;
+  restored: number;
+  skipped: number;
+  errors: string[];
+}
+
+export async function restoreFromBundle(
+  bundle: VEFBackupBundle,
+  existingVaultIds: Set<string>,
+  saveVault: (vault: VaultRef) => Promise<void>,
+): Promise<BundleRestoreResult> {
+  const result: BundleRestoreResult = {
+    total: bundle.vaults.length,
+    restored: 0,
+    skipped: 0,
+    errors: [],
+  };
+
+  for (const vef of bundle.vaults) {
+    const restoreResult = await restoreVaultFromVEF(vef, existingVaultIds, saveVault);
+    
+    if (restoreResult.success) {
+      if (restoreResult.skipped) {
+        result.skipped++;
+      } else {
+        result.restored++;
+        existingVaultIds.add(vef.vault_id); // Prevent duplicates in same batch
+      }
+    } else {
+      result.errors.push(`${vef.vault_id}: ${restoreResult.error}`);
+    }
+  }
+
+  return result;
+}
+
