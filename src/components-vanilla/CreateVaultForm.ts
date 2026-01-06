@@ -31,7 +31,7 @@ import {
   wipeDraft,
 } from '../lib/vaultCreation';
 import { VaultRef } from '../lib/storage';
-import styles from '../styles/CreateVaultForm.module.css';
+import styles from '../styles/create-vault-form.module.css';
 
 // ============================================================================
 // State

@@ -3,7 +3,7 @@
  */
 
 import { Component } from '@/lib/component';
-import styles from '../styles/VaultCountdown.module.css';
+import styles from '../styles/vault-countdown.module.css';
 
 interface TimeLeft {
   days: number;

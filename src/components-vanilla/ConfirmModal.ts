@@ -3,7 +3,7 @@
  */
 
 import { Component } from '@/lib/component';
-import styles from '../styles/ConfirmModal.module.css';
+import styles from '../styles/confirm-modal.module.css';
 import '../styles/shared.css';
 
 interface ConfirmModalState {
