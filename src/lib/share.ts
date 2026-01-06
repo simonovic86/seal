@@ -96,7 +96,8 @@ export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
 export function getShareableUrl(vault: VaultRef): string {
   const base = typeof window !== 'undefined' ? window.location.origin : '';
   const hash = encodeVaultForShare(vault);
-  return `${base}/vault/${vault.id}#${hash}`;
+  // Use relative path for IPFS compatibility
+  return `${base}/vault.html?id=${vault.id}#${hash}`;
 }
 
 /**
@@ -138,7 +139,8 @@ export function encodeBackupUrl(vaults: VaultRef[]): string {
     .replace(/=+$/, '');
 
   const base = typeof window !== 'undefined' ? window.location.origin : '';
-  return `${base}/restore#${base64}`;
+  // Use .html extension for IPFS compatibility
+  return `${base}/restore.html#${base64}`;
 }
 
 /**

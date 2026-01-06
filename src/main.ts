@@ -179,7 +179,7 @@ class HomePage {
       const unlockable = isUnlockable(vault.unlockTime);
       const link = document.createElement('a');
       const hashData = window.location.hash.slice(1) || '';
-      link.href = `/vault.html?id=${vault.id}${hashData ? '#' + hashData : ''}`;
+      link.href = `./vault.html?id=${vault.id}${hashData ? '#' + hashData : ''}`;
       link.className = styles.vaultLink;
 
       link.innerHTML = `

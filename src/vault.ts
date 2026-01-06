@@ -134,7 +134,7 @@ class VaultPage {
       </div>
       <h1 class="${styles.title}">Vault Not Found</h1>
       <p class="${styles.message}">This vault doesn't exist. Make sure you have the complete shareable link.</p>
-      <a href="/" class="btn-primary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Create a Vault</a>
+      <a href="./" class="btn-primary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Create a Vault</a>
     `;
     main.appendChild(card);
   }

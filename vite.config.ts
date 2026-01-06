@@ -5,6 +5,8 @@ import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfil
 import nodePolyfills from 'rollup-plugin-polyfill-node';
 
 export default defineConfig({
+  // Relative paths for IPFS and non-root deployments
+  base: './',
   build: {
     target: 'es2020',
     outDir: 'dist',

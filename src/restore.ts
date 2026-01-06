@@ -103,7 +103,7 @@ class RestorePage {
       </div>
       <h1 class="${styles.title}">Restore Failed</h1>
       <p class="${styles.message}">${this.error || 'An error occurred'}</p>
-      <a href="/" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Go Home</a>
+      <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Go Home</a>
     `;
     main.appendChild(card);
   }
@@ -183,7 +183,7 @@ class RestorePage {
       noVaults.className = styles.noVaultsMessage;
       noVaults.innerHTML = `
         <p class="${styles.noVaultsText}">All vaults already exist on this device.</p>
-        <a href="/" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Go to Vaults</a>
+        <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Go to Vaults</a>
       `;
       card.appendChild(noVaults);
     }
