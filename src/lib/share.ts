@@ -91,13 +91,24 @@ export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
 }
 
 /**
+ * Get the base path for the current deployment (handles IPFS, subdirectories, etc.)
+ */
+function getBasePath(): string {
+  if (typeof window === 'undefined') return '';
+  // Get everything up to and including the last /
+  const path = window.location.pathname;
+  const lastSlash = path.lastIndexOf('/');
+  const dir = lastSlash >= 0 ? path.slice(0, lastSlash + 1) : '/';
+  return window.location.origin + dir;
+}
+
+/**
  * Get full shareable URL for a vault
  */
 export function getShareableUrl(vault: VaultRef): string {
-  const base = typeof window !== 'undefined' ? window.location.origin : '';
+  const base = getBasePath();
   const hash = encodeVaultForShare(vault);
-  // Use relative path for IPFS compatibility
-  return `${base}/vault.html?id=${vault.id}#${hash}`;
+  return `${base}vault.html?id=${vault.id}#${hash}`;
 }
 
 /**
@@ -110,9 +121,14 @@ export function hasVaultDataInHash(): boolean {
 }
 
 // Compact format for backup bundle
+interface BackupVaultData extends ShareableData {
+  id: string;
+  c?: number; // createdAt (optional for backwards compat)
+}
+
 interface BackupBundle {
   v: 1; // version
-  vaults: Array<ShareableData & { id: string }>;
+  vaults: BackupVaultData[];
 }
 
 /**
@@ -126,6 +142,7 @@ export function encodeBackupUrl(vaults: VaultRef[]): string {
       k: vault.litEncryptedKey,
       h: vault.litKeyHash,
       t: vault.unlockTime,
+      c: vault.createdAt || undefined,
       n: vault.name,
       d: vault.inlineData,
       x: vault.destroyAfterRead,
@@ -138,9 +155,23 @@ export function encodeBackupUrl(vaults: VaultRef[]): string {
     .replace(/\//g, '_')
     .replace(/=+$/, '');
 
-  const base = typeof window !== 'undefined' ? window.location.origin : '';
-  // Use .html extension for IPFS compatibility
-  return `${base}/restore.html#${base64}`;
+  const base = getBasePath();
+  return `${base}restore.html#${base64}`;
+}
+
+/**
+ * Validate a single vault from backup data
+ */
+function isValidBackupVault(data: unknown): data is BackupVaultData {
+  if (!data || typeof data !== 'object') return false;
+  const v = data as Record<string, unknown>;
+  return (
+    typeof v.id === 'string' && v.id.length > 0 &&
+    typeof v.k === 'string' && v.k.length > 0 &&
+    typeof v.h === 'string' && v.h.length > 0 &&
+    typeof v.t === 'number' && v.t > 0 &&
+    typeof v.d === 'string' && v.d.length > 0
+  );
 }
 
 /**
@@ -171,16 +202,26 @@ export function decodeBackupFromHash(hash: string): VaultRef[] | null {
       return null;
     }
 
-    return bundle.vaults.map((data) => ({
-      id: data.id,
-      litEncryptedKey: data.k,
-      litKeyHash: data.h,
-      unlockTime: data.t,
-      createdAt: Date.now(), // Set to now when restoring
-      name: data.n,
-      inlineData: data.d,
-      destroyAfterRead: data.x,
-    }));
+    // Validate and convert each vault
+    const vaults: VaultRef[] = [];
+    for (const data of bundle.vaults) {
+      if (!isValidBackupVault(data)) {
+        console.warn('Skipping invalid vault in backup:', data);
+        continue;
+      }
+      vaults.push({
+        id: data.id,
+        litEncryptedKey: data.k,
+        litKeyHash: data.h,
+        unlockTime: data.t,
+        createdAt: data.c || Date.now(), // Preserve original or use now
+        name: data.n,
+        inlineData: data.d,
+        destroyAfterRead: data.x,
+      });
+    }
+
+    return vaults.length > 0 ? vaults : null;
   } catch (error) {
     console.error('Failed to decode backup:', error);
     return null;

@@ -224,7 +224,7 @@ class RestorePage {
     viewBtn.style.width = '100%';
     viewBtn.textContent = 'View Your Vaults';
     viewBtn.addEventListener('click', () => {
-      window.location.href = '/';
+      window.location.href = './';
     });
     card.appendChild(viewBtn);
 
