@@ -297,7 +297,7 @@ class VaultPage {
     });
 
     const homeLink = document.createElement('a');
-    homeLink.href = '/';
+    homeLink.href = './';
     homeLink.className = `btn-secondary ${styles.buttonFlex}`;
     homeLink.style.textAlign = 'center';
     homeLink.textContent = 'Create Vault';
@@ -334,7 +334,7 @@ class VaultPage {
     const backContainer = document.createElement('div');
     backContainer.className = styles.backButtonContainer;
     const backLink = document.createElement('a');
-    backLink.href = '/';
+    backLink.href = './';
     backLink.className = styles.backButton;
     backLink.innerHTML = `
       <svg class="${styles.backIcon}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
