@@ -44,6 +44,7 @@ interface State {
   step: Step;
   error: string | null;
   // Form fields
+  name: string;
   secret: string;
   unlockDate: string;
   unlockTime: string;
@@ -67,6 +68,7 @@ export class CreateVaultForm extends Component<State> {
     super({
       step: 'form',
       error: null,
+      name: resolveVaultName(),
       secret: '',
       unlockDate: '',
       unlockTime: '',
@@ -118,6 +120,26 @@ export class CreateVaultForm extends Component<State> {
 
     const form = this.createElement('form', [styles.form]);
     form.addEventListener('submit', (e) => this.handlePrepareVault(e));
+
+    // Name input (optional)
+    const nameField = this.createElement('div', [styles.field]);
+    const nameLabel = this.createElement('label', [styles.fieldLabel]);
+    nameLabel.innerHTML = `Vault Name <span class="${styles.optionalText}">(optional)</span>`;
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = styles.input;
+    nameInput.value = resolveVaultName(this.state.name);
+    nameInput.addEventListener('input', (e) => {
+      const rawValue = (e.target as HTMLInputElement).value;
+      const resolved = resolveVaultName(rawValue);
+      this.state.name = resolved;
+      if (resolved !== rawValue) {
+        (e.target as HTMLInputElement).value = resolved;
+      }
+    });
+    nameField.appendChild(nameLabel);
+    nameField.appendChild(nameInput);
+    form.appendChild(nameField);
 
     // Secret textarea
     const secretField = this.createElement('div', [styles.field]);
@@ -346,7 +368,7 @@ export class CreateVaultForm extends Component<State> {
   private async handlePrepareVault(e: Event): Promise<void> {
     e.preventDefault();
 
-    const { secret, unlockDate, unlockTime, destroyAfterRead } = this.state;
+    const { name, secret, unlockDate, unlockTime, destroyAfterRead } = this.state;
 
     // Parse and validate unlock time
     const unlockDateTime = new Date(`${unlockDate}T${unlockTime}`);
@@ -362,6 +384,7 @@ export class CreateVaultForm extends Component<State> {
 
       // Delegate to domain function - creates draft in memory
       this.draft = await createDraft({
+        name,
         secret,
         unlockTime: unlockTimeMs,
         destroyAfterRead,
@@ -370,6 +393,7 @@ export class CreateVaultForm extends Component<State> {
       // Clear secret from UI state immediately
       this.setState({
         step: 'draft',
+        name: resolveVaultName(),
         secret: '',
         error: null,
       });
@@ -442,6 +466,7 @@ export class CreateVaultForm extends Component<State> {
     this.setState({
       step: 'form',
       error: null,
+      name: resolveVaultName(),
       secret: '',
       unlockDate: '',
       unlockTime: '',
