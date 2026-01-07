@@ -266,29 +266,6 @@ export class CreateVaultForm extends Component<State> {
 
     container.appendChild(infoCard);
 
-    // Vault name input (editable before arming)
-    const nameField = this.createElement('div', [styles.field]);
-    const nameLabel = this.createElement('label', [styles.fieldLabel]);
-    nameLabel.innerHTML = `Vault Name <span class="${styles.optionalText}">(optional)</span>`;
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.className = styles.input;
-    const initialName = resolveVaultName(this.draft.name);
-    this.draft.name = initialName;
-    nameInput.value = initialName;
-    nameInput.addEventListener('input', (e) => {
-      if (!this.draft) return;
-      const rawValue = (e.target as HTMLInputElement).value;
-      const resolved = resolveVaultName(rawValue);
-      this.draft.name = resolved;
-      if (resolved !== rawValue) {
-        (e.target as HTMLInputElement).value = resolved;
-      }
-    });
-    nameField.appendChild(nameLabel);
-    nameField.appendChild(nameInput);
-    container.appendChild(nameField);
-
     // Error display
     if (this.state.error) {
       const errorDiv = this.createElement('div', [styles.error]);
