@@ -40,6 +40,22 @@ export async function deleteVaultRef(id: string): Promise<void> {
 }
 
 /**
+ * Forget a vault locally.
+ * 
+ * Removes the vault's metadata from this browser's local storage.
+ * This is local hygiene only — it does NOT:
+ * - Invalidate URLs
+ * - Affect encrypted payloads
+ * - Delete data from IPFS
+ * - Impact backups or other devices
+ * 
+ * Idempotent: safe to call multiple times.
+ */
+export async function forgetVault(id: string): Promise<void> {
+  await del(`${VAULT_PREFIX}${id}`);
+}
+
+/**
  * Get all saved vault references
  */
 export async function getAllVaultRefs(): Promise<VaultRef[]> {

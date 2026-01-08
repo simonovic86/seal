@@ -8,7 +8,7 @@ import './styles/shared.css';
 import './components-vanilla/Toast'; // Side-effect: registers toast event listener
 import { CreateVaultForm } from './components-vanilla/CreateVaultForm';
 import { confirm } from './components-vanilla/ConfirmModal';
-import { getAllVaultRefs, getAllVaultIds, saveVaultRef, VaultRef } from './lib/storage';
+import { getAllVaultRefs, getAllVaultIds, saveVaultRef, forgetVault, VaultRef } from './lib/storage';
 import { isUnlockable } from './lib/lit';
 import { eventBus } from './lib/component';
 import { resolveVaultNameForCreatedAt } from './lib/vaultName';
@@ -203,8 +203,23 @@ class HomePage {
         this.handleExportVault(vault);
       });
 
+      const forgetBtn = document.createElement('button');
+      forgetBtn.className = styles.forgetButton;
+      forgetBtn.title = 'Forget vault';
+      forgetBtn.innerHTML = `
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      `;
+      forgetBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.handleForgetVault(vault);
+      });
+
       item.appendChild(link);
       item.appendChild(exportBtn);
+      item.appendChild(forgetBtn);
       list.appendChild(item);
     });
 
@@ -230,6 +245,25 @@ class HomePage {
       const message = err instanceof Error ? err.message : 'Export failed';
       console.error('Export failed:', err);
       eventBus.emit('toast:show', message);
+    }
+  }
+
+  private async handleForgetVault(vault: VaultRef): Promise<void> {
+    const confirmed = await confirm(
+      'Forget Vault',
+      'This removes this vault from this browser only. The URL will still work.',
+      'Forget',
+      'Cancel',
+    );
+    if (!confirmed) return;
+
+    try {
+      await forgetVault(vault.id);
+      this.vaults = this.vaults.filter((v) => v.id !== vault.id);
+      this.renderVaultList();
+    } catch (err) {
+      console.error('Forget vault failed:', err);
+      eventBus.emit('toast:show', 'Failed to forget vault');
     }
   }
 
