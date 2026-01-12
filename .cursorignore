@@ -10,3 +10,6 @@ package-lock.json
 # Generated files
 *.map
 
+# Capacitor - Native platforms
+ios/
+android/
