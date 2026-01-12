@@ -1,16 +1,19 @@
 .card {
   max-width: 32rem;
+  width: 100%;
   margin: 0 auto;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   padding: var(--space-6);
+  box-sizing: border-box;
 }
 
 @media (max-width: 480px) {
   .card {
     border: none;
-    padding: 0;
+    padding: var(--space-4);
     background: transparent;
+    max-width: 100%;
   }
 }
 
@@ -22,9 +25,15 @@
   font-size: var(--text-xs);
   font-weight: 400;
   color: var(--color-fg-muted);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
   letter-spacing: 0.04em;
   text-transform: lowercase;
+}
+
+@media (max-width: 480px) {
+  .heading {
+    margin-bottom: var(--space-8);
+  }
 }
 
 .form {
@@ -49,7 +58,7 @@
   font-size: var(--text-xs);
   font-weight: 400;
   color: var(--color-fg-muted);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
   letter-spacing: 0.04em;
   text-transform: lowercase;
 }
@@ -61,12 +70,20 @@
 
 .input {
   width: 100%;
-  padding: 0.625rem 0.75rem;
+  max-width: 100%;
+  padding: 0.75rem 1rem;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   color: var(--color-fg);
   font-size: 16px; /* Prevents iOS zoom on focus */
   font-family: var(--font-mono);
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .input {
+    padding: 1rem;
+  }
 }
 
 .input::placeholder {
@@ -80,7 +97,13 @@
 
 .textarea {
   resize: none;
-  min-height: 100px;
+  min-height: 120px;
+}
+
+@media (max-width: 480px) {
+  .textarea {
+    min-height: 140px;
+  }
 }
 
 .inputError {
