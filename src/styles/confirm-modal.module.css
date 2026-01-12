@@ -6,6 +6,8 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
 }
 
 .backdrop {
@@ -71,7 +73,7 @@
   width: 100%;
 }
 
-@media (max-width: 360px) {
+@media (max-width: 480px) {
   .actions {
     flex-direction: column-reverse;
   }
@@ -80,11 +82,11 @@
 .cancelButton {
   flex: 1;
   padding: 0.625rem;
-  min-height: 2.25rem;
+  min-height: 2.5rem;
 }
 
 .confirmButton {
   flex: 1;
   padding: 0.625rem;
-  min-height: 2.25rem;
+  min-height: 2.5rem;
 }

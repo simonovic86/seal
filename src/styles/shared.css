@@ -107,7 +107,7 @@
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   color: var(--color-fg);
-  font-size: var(--text-sm);
+  font-size: 16px; /* Prevents iOS zoom on focus */
   font-family: var(--font-mono);
   font-weight: 400;
   line-height: 1.6;

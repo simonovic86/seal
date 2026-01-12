@@ -3,7 +3,15 @@
   margin: 0 auto;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  padding: var(--space-5);
+  padding: var(--space-6);
+}
+
+@media (max-width: 480px) {
+  .card {
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
 }
 
 .cardCenter {
@@ -22,7 +30,13 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-5);
+}
+
+@media (max-width: 480px) {
+  .form {
+    gap: var(--space-6);
+  }
 }
 
 .field {
@@ -51,7 +65,7 @@
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   color: var(--color-fg);
-  font-size: var(--text-sm);
+  font-size: 16px; /* Prevents iOS zoom on focus */
   font-family: var(--font-mono);
 }
 
@@ -192,7 +206,7 @@
   gap: var(--space-2);
 }
 
-@media (max-width: 360px) {
+@media (max-width: 480px) {
   .buttonRow {
     flex-direction: column;
   }
