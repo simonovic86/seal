@@ -1,42 +1,45 @@
 .container {
   text-align: center;
-  padding: var(--space-8) 0;
+  padding: var(--space-6) 0;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-elevated);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-fg-subtle);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
+  font-size: var(--text-xs);
+  text-transform: lowercase;
 }
 
 .badgeReady {
-  color: var(--zinc-300);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .badgeIcon {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1rem;
+  height: 1rem;
 }
 
 .badgeText {
-  font-weight: 500;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .timeBlocks {
   display: flex;
   justify-content: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 @media (min-width: 640px) {
   .timeBlocks {
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 }
 
@@ -50,50 +53,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 4rem;
-  height: 4rem;
-  background: var(--color-surface-elevated);
+  width: 3.5rem;
+  height: 3.5rem;
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
 }
 
 @media (min-width: 640px) {
   .timeValue {
-    width: 5rem;
-    height: 5rem;
+    width: 4.5rem;
+    height: 4.5rem;
   }
 }
 
 .timeNumber {
-  font-size: var(--text-2xl);
+  font-size: var(--text-lg);
   font-family: var(--font-mono);
-  font-weight: bold;
-  color: var(--zinc-100);
+  font-weight: 400;
+  color: var(--color-fg);
 }
 
 @media (min-width: 640px) {
   .timeNumber {
-    font-size: var(--text-3xl);
+    font-size: var(--text-xl);
   }
 }
 
 .timeLabel {
   margin-top: var(--space-2);
   font-size: var(--text-xs);
-  color: var(--zinc-500);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-@media (min-width: 640px) {
-  .timeLabel {
-    font-size: var(--text-sm);
-  }
+  color: var(--color-fg-subtle);
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
 }
 
 .unlockInfo {
-  margin-top: var(--space-6);
-  font-size: var(--text-sm);
-  color: var(--zinc-500);
+  margin-top: var(--space-5);
+  font-size: var(--text-xs);
+  color: var(--color-fg-subtle);
 }
-

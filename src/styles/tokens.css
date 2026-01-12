@@ -1,93 +1,96 @@
 /**
  * Design System Tokens
- * CSS Custom Properties for the Time-Locked Vault app
+ * Terminal / Cryptographic Aesthetic
  */
 
 :root {
   /* Colors - Background */
-  --color-bg-top: #0f0f11;
-  --color-bg-bottom: #09090b;
+  --color-bg: #0a0a0a;
+  --color-bg-top: #0a0a0a;
+  --color-bg-bottom: #0a0a0a;
   
   /* Colors - Foreground */
-  --color-fg: #fafafa;
-  --color-fg-muted: #a1a1aa;
-  --color-fg-subtle: #71717a;
-  --color-fg-disabled: #52525b;
+  --color-fg: #e0e0e0;
+  --color-fg-muted: #808080;
+  --color-fg-subtle: #5a5a5a;
+  --color-fg-disabled: #404040;
   
   /* Colors - Surfaces */
-  --color-surface: #111113;
-  --color-surface-elevated: #1a1a1c;
-  --color-surface-hover: #27272a;
+  --color-surface: #0a0a0a;
+  --color-surface-elevated: #111111;
+  --color-surface-hover: #1a1a1a;
   
   /* Colors - Borders */
-  --color-border: rgba(39, 39, 42, 0.5);
-  --color-border-hover: rgba(63, 63, 70, 0.5);
-  --color-border-focus: rgba(113, 113, 122, 0.8);
+  --color-border: #252525;
+  --color-border-hover: #333333;
+  --color-border-focus: #4a9f4a;
   
   /* Colors - Primary */
-  --color-primary: #ffffff;
-  --color-primary-hover: #e4e4e7;
-  --color-primary-text: #18181b;
+  --color-primary: #e0e0e0;
+  --color-primary-hover: #ffffff;
+  --color-primary-text: #0a0a0a;
   
-  /* Colors - Accent */
-  --color-emerald: #10b981;
-  --color-red: #ef4444;
+  /* Colors - Accent (muted green) */
+  --color-accent: #4a9f4a;
+  --color-accent-muted: #3d7a3d;
+  --color-emerald: #4a9f4a;
+  --color-red: #b54a4a;
   
-  /* Colors - Zinc Scale */
-  --zinc-50: #fafafa;
-  --zinc-100: #f4f4f5;
-  --zinc-200: #e4e4e7;
-  --zinc-300: #d4d4d8;
-  --zinc-400: #a1a1aa;
-  --zinc-500: #71717a;
-  --zinc-600: #52525b;
-  --zinc-700: #3f3f46;
-  --zinc-800: #27272a;
-  --zinc-900: #18181b;
+  /* Colors - Gray Scale */
+  --zinc-50: #e0e0e0;
+  --zinc-100: #c0c0c0;
+  --zinc-200: #a0a0a0;
+  --zinc-300: #909090;
+  --zinc-400: #808080;
+  --zinc-500: #606060;
+  --zinc-600: #404040;
+  --zinc-700: #2a2a2a;
+  --zinc-800: #1a1a1a;
+  --zinc-900: #0f0f0f;
   
   /* Spacing */
-  --space-1: 0.25rem;    /* 4px */
-  --space-2: 0.5rem;     /* 8px */
-  --space-3: 0.75rem;    /* 12px */
-  --space-4: 1rem;       /* 16px */
-  --space-5: 1.25rem;    /* 20px */
-  --space-6: 1.5rem;     /* 24px */
-  --space-8: 2rem;       /* 32px */
-  --space-10: 2.5rem;    /* 40px */
-  --space-12: 3rem;      /* 48px */
-  --space-16: 4rem;      /* 64px */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
   
-  /* Border Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-full: 9999px;
+  /* Border Radius - Minimal */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-full: 0;
   
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  /* Shadows - None */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
   
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Transitions - Instant */
+  --transition-fast: 0ms;
+  --transition-base: 0ms;
+  --transition-slow: 0ms;
   
-  /* Font Family */
-  --font-sans: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Font Family - Monospace only */
+  --font-sans: 'JetBrains Mono', ui-monospace, 'SF Mono', Monaco, 'Cascadia Mono', monospace;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Monaco, 'Cascadia Mono', monospace;
   
-  /* Font Sizes */
-  --text-xs: 0.8125rem;    /* 13px */
-  --text-sm: 0.9375rem;    /* 15px */
-  --text-base: 1.0625rem;  /* 17px */
-  --text-lg: 1.1875rem;    /* 19px */
-  --text-xl: 1.375rem;     /* 22px */
-  --text-2xl: 1.75rem;     /* 28px */
-  --text-3xl: 2.25rem;     /* 36px */
-  --text-4xl: 3rem;        /* 48px */
+  /* Font Sizes - Reduced */
+  --text-xs: 0.6875rem;    /* 11px */
+  --text-sm: 0.8125rem;    /* 13px */
+  --text-base: 0.875rem;   /* 14px */
+  --text-lg: 1rem;         /* 16px */
+  --text-xl: 1.125rem;     /* 18px */
+  --text-2xl: 1.375rem;    /* 22px */
+  --text-3xl: 1.75rem;     /* 28px */
+  --text-4xl: 2.25rem;     /* 36px */
   
   /* Z-Index */
   --z-base: 1;

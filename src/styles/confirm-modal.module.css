@@ -11,20 +11,16 @@
 .backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .modal {
   position: relative;
   width: 100%;
-  max-width: 32rem;
+  max-width: 28rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-lg);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  animation: fade-in 0.3s ease-out;
+  padding: var(--space-5);
 }
 
 .modal:focus {
@@ -42,36 +38,36 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: var(--radius-full);
-  background: rgba(39, 39, 42, 0.8);
-  border: 1px solid var(--color-border-hover);
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-border);
+  background: transparent;
   margin-bottom: var(--space-4);
 }
 
 .icon {
-  width: 1.75rem;
-  height: 1.75rem;
-  color: var(--zinc-400);
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-fg-muted);
 }
 
 .title {
-  font-size: var(--text-lg);
-  font-weight: 600;
-  color: var(--zinc-100);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--color-fg);
   margin-bottom: var(--space-2);
+  text-transform: lowercase;
 }
 
 .message {
-  font-size: var(--text-sm);
-  color: var(--zinc-400);
-  margin-bottom: var(--space-6);
+  font-size: var(--text-xs);
+  color: var(--color-fg-muted);
+  margin-bottom: var(--space-5);
 }
 
 .actions {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-2);
   width: 100%;
 }
 
@@ -83,13 +79,12 @@
 
 .cancelButton {
   flex: 1;
-  padding: 0.75rem;
-  min-height: 2.75rem;
+  padding: 0.625rem;
+  min-height: 2.25rem;
 }
 
 .confirmButton {
   flex: 1;
-  padding: 0.75rem;
-  min-height: 2.75rem;
+  padding: 0.625rem;
+  min-height: 2.25rem;
 }
-
