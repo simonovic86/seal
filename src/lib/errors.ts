@@ -14,8 +14,8 @@ interface ErrorInfo {
 export function getFriendlyError(error: Error): ErrorInfo {
   const msg = error.message.toLowerCase();
 
-  // Lit Protocol errors
-  if (msg.includes('access control conditions')) {
+  // drand/tlock errors
+  if (msg.includes('round') && (msg.includes('not yet') || msg.includes('future'))) {
     return {
       title: 'Time Lock Active',
       message: 'This vault is still locked. Please wait until the unlock time.',
@@ -23,19 +23,19 @@ export function getFriendlyError(error: Error): ErrorInfo {
     };
   }
 
-  if (msg.includes('lit') && msg.includes('connect')) {
+  if (msg.includes('drand') || msg.includes('beacon')) {
     return {
       title: 'Network Connection Failed',
-      message: 'Could not connect to the Lit Protocol network. Please check your internet connection and try again.',
+      message: 'Could not connect to the drand randomness beacon. Please check your internet connection and try again.',
       recoverable: true,
     };
   }
 
-  if (msg.includes('session') || msg.includes('auth')) {
+  if (msg.includes('tlock') && msg.includes('decrypt')) {
     return {
-      title: 'Authentication Error',
-      message: 'Session expired or invalid. Please refresh the page and try again.',
-      recoverable: true,
+      title: 'Decryption Failed',
+      message: 'Could not decrypt the timelock. The vault may be corrupted or not yet unlockable.',
+      recoverable: false,
     };
   }
 

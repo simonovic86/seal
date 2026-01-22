@@ -8,8 +8,8 @@ import { get, set, del, keys } from 'idb-keyval';
 export interface VaultRef {
   id: string;
   unlockTime: number;
-  litEncryptedKey: string;
-  litKeyHash: string;
+  tlockCiphertext: string;  // tlock-encrypted symmetric key
+  tlockRound: number;       // drand round number for decryption
   createdAt: number;
   name?: string;
   inlineData: string;  // Base64 encrypted data stored in URL

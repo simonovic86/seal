@@ -2,14 +2,13 @@
  * Home page - Create vaults and view vault list
  */
 
-import './polyfills';
 import './styles/globals.css';
 import './styles/shared.css';
 import './components-vanilla/Toast'; // Side-effect: registers toast event listener
 import { CreateVaultForm } from './components-vanilla/CreateVaultForm';
 import { confirm } from './components-vanilla/ConfirmModal';
 import { getAllVaultRefs, getAllVaultIds, saveVaultRef, forgetVault, VaultRef } from './lib/storage';
-import { isUnlockable } from './lib/lit';
+import { isUnlockable } from './lib/tlock';
 import { eventBus } from './lib/component';
 import { resolveVaultNameForCreatedAt } from './lib/vaultName';
 import {
@@ -79,18 +78,19 @@ class HomePage {
     const badges = document.createElement('div');
     badges.className = styles.techBadges;
 
-    const litBadge = document.createElement('a');
-    litBadge.href = 'https://litprotocol.com';
-    litBadge.target = '_blank';
-    litBadge.rel = 'noopener noreferrer';
-    litBadge.className = styles.litBadge;
-    litBadge.innerHTML = `
-      <svg class="${styles.litIcon}" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    const drandBadge = document.createElement('a');
+    drandBadge.href = 'https://drand.love';
+    drandBadge.target = '_blank';
+    drandBadge.rel = 'noopener noreferrer';
+    drandBadge.className = styles.techBadge;
+    drandBadge.innerHTML = `
+      <svg class="${styles.techIcon}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 6v6l4 2"/>
       </svg>
-      Lit Protocol
+      drand
     `;
-    badges.appendChild(litBadge);
+    badges.appendChild(drandBadge);
 
     footer.appendChild(badges);
 

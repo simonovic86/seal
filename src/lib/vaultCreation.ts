@@ -15,7 +15,7 @@
  * │  ─────────────────                                                      │
  * │  • Encrypts plaintext with a new symmetric key                          │
  * │  • Holds encrypted payload + raw key in memory ONLY                     │
- * │  • No network calls (no Lit Protocol)                                   │
+ * │  • No network calls (no drand/tlock)                                    │
  * │  • No persistence (nothing saved)                                       │
  * │  • Fully reversible - can discard at any time                          │
  * └─────────────────────────────────────────────────────────────────────────┘
@@ -30,7 +30,7 @@
  * ┌─────────────────────────────────────────────────────────────────────────┐
  * │  PHASE 2: ARMED                                                         │
  * │  ──────────────                                                         │
- * │  • Calls Lit Protocol to create time-lock on the key                   │
+ * │  • Uses tlock (drand) to create time-lock on the key                   │
  * │  • Persists vault reference to storage                                  │
  * │  • IMMEDIATELY wipes all sensitive draft data                          │
  * │  • No undo, no recovery, no retry                                      │
@@ -42,7 +42,7 @@
 
 import { generateKey, exportKey, encrypt } from './crypto';
 import { toBase64 } from './encoding';
-import { initLit, encryptKeyWithTimelock } from './lit';
+import { encryptKeyWithTimelock } from './tlock';
 import { saveVaultRef, VaultRef } from './storage';
 import { resolveVaultName } from './vaultName';
 
@@ -139,7 +139,7 @@ export async function createDraft(input: CreateDraftInput): Promise<VaultDraft> 
  * PHASE 2: Arm a draft vault. IRREVERSIBLE.
  *
  * This function:
- * - Calls Lit Protocol to create a time-lock on the key
+ * - Uses tlock (drand) to create a time-lock on the key
  * - Persists the vault reference to storage
  * - Returns the finalized vault reference
  *
@@ -152,11 +152,8 @@ export async function createDraft(input: CreateDraftInput): Promise<VaultDraft> 
 export async function armDraft(draft: VaultDraft): Promise<VaultRef> {
   const resolvedName = resolveVaultName(draft.name);
 
-  // Initialize Lit Protocol
-  await initLit();
-
-  // Create time-lock with Lit Protocol
-  const { encryptedKey, encryptedKeyHash } = await encryptKeyWithTimelock(
+  // Create time-lock with tlock (drand)
+  const { ciphertext, roundNumber } = await encryptKeyWithTimelock(
     draft.rawKey,
     draft.unlockTime,
   );
@@ -165,8 +162,8 @@ export async function armDraft(draft: VaultDraft): Promise<VaultRef> {
   const vault: VaultRef = {
     id: crypto.randomUUID(),
     unlockTime: draft.unlockTime,
-    litEncryptedKey: encryptedKey,
-    litKeyHash: encryptedKeyHash,
+    tlockCiphertext: ciphertext,
+    tlockRound: roundNumber,
     createdAt: Date.now(),
     name: resolvedName,
     inlineData: draft.inlineData,

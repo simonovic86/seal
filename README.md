@@ -58,7 +58,7 @@ Seal does one thing: hold content until a time, then release it.
 ## Technical notes
 
 - Encryption: AES-GCM, client-side
-- Time-lock: Lit Protocol threshold cryptography
+- Time-lock: drand (tlock) - distributed randomness beacon
 - Storage: Browser localStorage for vault references
 - No server-side storage of content or keys
 

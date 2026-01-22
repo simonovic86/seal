@@ -416,7 +416,7 @@ export class CreateVaultForm extends Component<State> {
       this.setState({ step: 'arming', error: null });
 
       // === POINT OF NO RETURN ===
-      // armDraft calls Lit Protocol and persists the vault
+      // armDraft creates tlock encryption and persists the vault
       const vault = await armDraft(draftToArm);
 
       // === WIPE SENSITIVE DATA ===

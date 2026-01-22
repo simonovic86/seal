@@ -13,7 +13,7 @@ const IV_LENGTH = 12; // 96 bits recommended for GCM
 export async function generateKey(): Promise<CryptoKey> {
   return crypto.subtle.generateKey(
     { name: ALGORITHM, length: KEY_LENGTH },
-    true, // extractable - we need to export it for Lit
+    true, // extractable - we need to export it for tlock
     ['encrypt', 'decrypt'],
   );
 }

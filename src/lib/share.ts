@@ -1,19 +1,21 @@
 /**
  * Shareable vault links
- * 
+ *
  * Encodes vault data in URL hash for cross-device sharing.
  * Format: /vault/[id]#base64(json)
+ *
+ * v2: Uses tlock fields (c=ciphertext, r=round) instead of Lit fields (k, h)
  */
 
 import { VaultRef } from './storage';
 
-// Compact format to minimize URL length
+// Compact format to minimize URL length (v2 - tlock)
 interface ShareableData {
-  k: string;  // litEncryptedKey
-  h: string;  // litKeyHash
-  t: number;  // unlockTime
-  n?: string; // name (optional)
-  d: string;  // inlineData (base64 encrypted data)
+  c: string;   // tlockCiphertext
+  r: number;   // tlockRound
+  t: number;   // unlockTime
+  n?: string;  // name (optional)
+  d: string;   // inlineData (base64 encrypted data)
   x?: boolean; // destroyAfterRead (burn after reading)
 }
 
@@ -40,15 +42,15 @@ export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
     const json = atob(base64);
     const data: ShareableData = JSON.parse(json);
 
-    // Validate required fields
-    if (!data.k || !data.h || !data.t || !data.d) {
+    // Validate required fields (v2 tlock format)
+    if (!data.c || !data.r || !data.t || !data.d) {
       return null;
     }
 
     return {
       id,
-      litEncryptedKey: data.k,
-      litKeyHash: data.h,
+      tlockCiphertext: data.c,
+      tlockRound: data.r,
       unlockTime: data.t,
       createdAt: 0, // Unknown for shared vaults
       name: data.n,
@@ -61,27 +63,27 @@ export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
   }
 }
 
-// Compact format for backup bundle
+// Compact format for backup bundle (v2 - tlock)
 interface BackupVaultData extends ShareableData {
   id: string;
-  c?: number; // createdAt (optional for backwards compat)
+  a?: number; // createdAt (optional)
 }
 
 interface BackupBundle {
-  v: 1; // version
+  v: 2; // version (v2 for tlock)
   vaults: BackupVaultData[];
 }
 
 /**
- * Validate a single vault from backup data
+ * Validate a single vault from backup data (v2 tlock format)
  */
 function isValidBackupVault(data: unknown): data is BackupVaultData {
   if (!data || typeof data !== 'object') return false;
   const v = data as Record<string, unknown>;
   return (
     typeof v.id === 'string' && v.id.length > 0 &&
-    typeof v.k === 'string' && v.k.length > 0 &&
-    typeof v.h === 'string' && v.h.length > 0 &&
+    typeof v.c === 'string' && v.c.length > 0 &&
+    typeof v.r === 'number' && v.r > 0 &&
     typeof v.t === 'number' && v.t > 0 &&
     typeof v.d === 'string' && v.d.length > 0
   );
@@ -110,8 +112,8 @@ export function decodeBackupFromHash(hash: string): VaultRef[] | null {
     const json = atob(base64);
     const bundle: BackupBundle = JSON.parse(json);
 
-    // Validate version
-    if (bundle.v !== 1 || !Array.isArray(bundle.vaults)) {
+    // Validate version (v2 for tlock)
+    if (bundle.v !== 2 || !Array.isArray(bundle.vaults)) {
       return null;
     }
 
@@ -124,10 +126,10 @@ export function decodeBackupFromHash(hash: string): VaultRef[] | null {
       }
       vaults.push({
         id: data.id,
-        litEncryptedKey: data.k,
-        litKeyHash: data.h,
+        tlockCiphertext: data.c,
+        tlockRound: data.r,
         unlockTime: data.t,
-        createdAt: data.c || Date.now(), // Preserve original or use now
+        createdAt: data.a || Date.now(), // Preserve original or use now
         name: data.n,
         inlineData: data.d,
         destroyAfterRead: data.x,

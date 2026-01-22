@@ -2,14 +2,13 @@
  * Vault detail page - View and unlock vaults
  */
 
-import './polyfills';
 import './styles/globals.css';
 import './styles/shared.css';
 import { VaultCountdown } from './components-vanilla/VaultCountdown';
 import { confirm } from './components-vanilla/ConfirmModal';
 import { getVaultRef, deleteVaultRef, VaultRef } from './lib/storage';
 import { fromBase64 } from './lib/encoding';
-import { initLit, decryptKey, isUnlockable } from './lib/lit';
+import { decryptKey, isUnlockable } from './lib/tlock';
 import { importKey, decryptToString } from './lib/crypto';
 import { decodeVaultFromHash } from './lib/share';
 import { getFriendlyError } from './lib/errors';
@@ -394,18 +393,12 @@ class VaultPage {
     this.render();
 
     try {
-      // Connect to Lit
-      this.progress = 'Connecting to Lit Network...';
-      this.render();
-      await initLit();
-
-      // Get decryption key from Lit
-      this.progress = 'Retrieving decryption key...';
+      // Get decryption key from drand via tlock
+      this.progress = 'Fetching randomness from drand...';
       this.render();
       const rawKey = await decryptKey(
-        this.vault.litEncryptedKey,
-        this.vault.litKeyHash,
-        this.vault.unlockTime,
+        this.vault.tlockCiphertext,
+        this.vault.tlockRound,
       );
 
       // Load encrypted data from URL

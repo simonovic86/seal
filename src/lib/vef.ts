@@ -1,5 +1,5 @@
 /**
- * Vault Export File (VEF) Format
+ * Vault Export File (VEF) Format v2.0
  *
  * A portable, deterministic JSON format for vault backup and restore.
  * Contains only encrypted data and metadata - no secrets, no plaintext, no keys.
@@ -10,17 +10,19 @@
  * - Idempotent: Same vault → same vault_id, no duplicates on restore
  * - Forward-compatible: Versioned schema
  * - Safe: Partial restore fails explicitly
+ *
+ * v2.0 uses drand/tlock for timelock encryption (replaces Lit Protocol from v1.0)
  */
 
 import { VaultRef } from './storage';
 import { resolveVaultNameForCreatedAt } from './vaultName';
-import { toBase64, fromBase64 } from './encoding';
+import { DRAND_CHAIN_HASH, calculateRound } from './tlock';
 
 // =============================================================================
 // Constants
 // =============================================================================
 
-export const VEF_VERSION = '1.0.0';
+export const VEF_VERSION = '2.0.0';
 export const VEF_FILE_EXTENSION = '.vef.json';
 
 // Supported crypto configurations
@@ -28,9 +30,10 @@ const SUPPORTED_ALGORITHMS = ['AES-GCM'] as const;
 const SUPPORTED_KEY_LENGTHS = [256] as const;
 const SUPPORTED_IV_LENGTHS = [12] as const;
 
-// Supported Lit configurations
-const SUPPORTED_LIT_CHAINS = ['ethereum'] as const;
-const SUPPORTED_LIT_NETWORKS = ['datil-dev', 'datil'] as const;
+// Supported drand chain hashes
+const SUPPORTED_CHAIN_HASHES = [
+  '52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971', // quicknet (mainnet)
+] as const;
 
 // =============================================================================
 // VEF Schema Types
@@ -46,43 +49,16 @@ export interface VEFCrypto {
 }
 
 /**
- * Lit Protocol access control condition (fully expanded, no references)
+ * tlock (drand timelock) configuration
  */
-export interface VEFLitCondition {
-  conditionType: 'evmBasic';
-  contractAddress: string;
-  standardContractType: 'timestamp';
-  chain: 'ethereum';
-  method: string;
-  parameters: string[];
-  returnValueTest: {
-    comparator: '>=' | '<=' | '>' | '<' | '==' | '!=';
-    value: string;
-  };
+export interface VEFTlock {
+  chain_hash: string;  // drand chain identifier
+  round: number;       // target round number
+  ciphertext: string;  // tlock-encrypted symmetric key
 }
 
 /**
- * Lit Protocol configuration
- */
-export interface VEFLit {
-  network: 'datil-dev' | 'datil';
-  chain: 'ethereum';
-  conditions: VEFLitCondition[];
-  encrypted_key: string;
-  encrypted_key_hash: string;
-}
-
-/**
- * Lit validation snapshot for debugging/verification
- */
-export interface VEFLitValidation {
-  chain: 'ethereum';
-  sdk_version: string;
-  network: 'datil-dev' | 'datil';
-}
-
-/**
- * The complete Vault Export File format
+ * The complete Vault Export File format (v2.0)
  */
 export interface VaultExportFile {
   // Schema version
@@ -97,8 +73,8 @@ export interface VaultExportFile {
   // Crypto parameters
   crypto: VEFCrypto;
 
-  // Lit Protocol configuration
-  lit: VEFLit;
+  // tlock configuration (replaces lit from v1.0)
+  tlock: VEFTlock;
 
   // Timestamps
   unlock_timestamp: number; // Unix ms when vault becomes unlockable
@@ -106,9 +82,6 @@ export interface VaultExportFile {
 
   // App metadata
   app_version: string;
-
-  // Lit validation snapshot
-  lit_validation: VEFLitValidation;
 
   // Optional user-defined name
   name?: string;
@@ -161,20 +134,20 @@ export interface VEFRestorePreview {
  * Hash inputs:
  * - encrypted_payload
  * - unlock_timestamp
- * - lit conditions (serialized)
- * - lit encrypted_key_hash
+ * - tlock ciphertext
+ * - tlock round
  */
 export async function generateVaultId(
   encryptedPayload: string,
   unlockTimestamp: number,
-  litConditions: VEFLitCondition[],
-  litEncryptedKeyHash: string,
+  tlockCiphertext: string,
+  tlockRound: number,
 ): Promise<string> {
   const content = JSON.stringify({
     p: encryptedPayload,
     t: unlockTimestamp,
-    c: litConditions,
-    h: litEncryptedKeyHash,
+    c: tlockCiphertext,
+    r: tlockRound,
   });
 
   const encoder = new TextEncoder();
@@ -188,27 +161,6 @@ export async function generateVaultId(
     .join('');
 }
 
-/**
- * Build Lit conditions from unlock timestamp
- */
-function buildLitConditions(unlockTimestamp: number): VEFLitCondition[] {
-  const unlockTimeSeconds = Math.floor(unlockTimestamp / 1000);
-  return [
-    {
-      conditionType: 'evmBasic',
-      contractAddress: '',
-      standardContractType: 'timestamp',
-      chain: 'ethereum',
-      method: '',
-      parameters: [],
-      returnValueTest: {
-        comparator: '>=',
-        value: unlockTimeSeconds.toString(),
-      },
-    },
-  ];
-}
-
 // =============================================================================
 // Export Function
 // =============================================================================
@@ -220,11 +172,11 @@ export function validateVaultForExport(vault: VaultRef): string | null {
   if (!vault.inlineData) {
     return 'Vault is incomplete (missing encrypted data)';
   }
-  if (!vault.litEncryptedKey) {
-    return 'Vault is incomplete (missing time-lock key)';
+  if (!vault.tlockCiphertext) {
+    return 'Vault is incomplete (missing tlock ciphertext)';
   }
-  if (!vault.litKeyHash) {
-    return 'Vault is incomplete (missing key hash)';
+  if (!vault.tlockRound || vault.tlockRound <= 0) {
+    return 'Vault is incomplete (missing tlock round)';
   }
   if (!vault.unlockTime || vault.unlockTime <= 0) {
     return 'Vault is incomplete (missing unlock time)';
@@ -237,14 +189,12 @@ export function validateVaultForExport(vault: VaultRef): string | null {
  *
  * @param vault - The vault reference to export
  * @param appVersion - Current app version
- * @param litSdkVersion - Lit SDK version used
  * @returns VaultExportFile object
  * @throws Error if vault is missing required fields
  */
 export async function exportVault(
   vault: VaultRef,
-  appVersion: string = '0.2.0',
-  litSdkVersion: string = '7.3.1',
+  appVersion: string = '0.3.0',
 ): Promise<VaultExportFile> {
   // Validate vault has required fields
   const validationError = validateVaultForExport(vault);
@@ -252,14 +202,12 @@ export async function exportVault(
     throw new Error(validationError);
   }
 
-  const conditions = buildLitConditions(vault.unlockTime);
-
   // Generate deterministic vault_id
   const vaultId = await generateVaultId(
     vault.inlineData,
     vault.unlockTime,
-    conditions,
-    vault.litKeyHash,
+    vault.tlockCiphertext,
+    vault.tlockRound,
   );
 
   const vef: VaultExportFile = {
@@ -271,21 +219,14 @@ export async function exportVault(
       key_length: 256,
       iv_length: 12,
     },
-    lit: {
-      network: 'datil-dev',
-      chain: 'ethereum',
-      conditions,
-      encrypted_key: vault.litEncryptedKey,
-      encrypted_key_hash: vault.litKeyHash,
+    tlock: {
+      chain_hash: DRAND_CHAIN_HASH,
+      round: vault.tlockRound,
+      ciphertext: vault.tlockCiphertext,
     },
     unlock_timestamp: vault.unlockTime,
     created_at: vault.createdAt || Date.now(),
     app_version: appVersion,
-    lit_validation: {
-      chain: 'ethereum',
-      sdk_version: litSdkVersion,
-      network: 'datil-dev',
-    },
   };
 
   const resolvedName = resolveVaultNameForCreatedAt(vault.name, vault.createdAt);
@@ -306,9 +247,8 @@ export async function exportVault(
 export async function exportVaultToJson(
   vault: VaultRef,
   appVersion?: string,
-  litSdkVersion?: string,
 ): Promise<string> {
-  const vef = await exportVault(vault, appVersion, litSdkVersion);
+  const vef = await exportVault(vault, appVersion);
   return JSON.stringify(vef, null, 2);
 }
 
@@ -357,6 +297,15 @@ export function validateVEF(data: unknown): VEFValidationResult {
     return { valid: false, error: 'Missing vef_version', field: 'vef_version' };
   }
 
+  // Check for v1.0 (Lit Protocol) files
+  if (vef.vef_version.startsWith('1.')) {
+    return {
+      valid: false,
+      error: 'This vault was created with an older version (Lit Protocol). It cannot be imported into this version which uses drand/tlock.',
+      field: 'vef_version',
+    };
+  }
+
   // vault_id
   if (typeof vef.vault_id !== 'string' || vef.vault_id.length < 8) {
     return { valid: false, error: 'Invalid vault_id', field: 'vault_id' };
@@ -371,9 +320,9 @@ export function validateVEF(data: unknown): VEFValidationResult {
   const cryptoResult = validateCrypto(vef.crypto);
   if (!cryptoResult.valid) return cryptoResult;
 
-  // lit
-  const litResult = validateLit(vef.lit);
-  if (!litResult.valid) return litResult;
+  // tlock
+  const tlockResult = validateTlock(vef.tlock);
+  if (!tlockResult.valid) return tlockResult;
 
   // unlock_timestamp
   if (typeof vef.unlock_timestamp !== 'number' || vef.unlock_timestamp <= 0) {
@@ -389,10 +338,6 @@ export function validateVEF(data: unknown): VEFValidationResult {
   if (typeof vef.app_version !== 'string') {
     return { valid: false, error: 'Missing app_version', field: 'app_version' };
   }
-
-  // lit_validation
-  const litValidationResult = validateLitValidation(vef.lit_validation);
-  if (!litValidationResult.valid) return litValidationResult;
 
   // Optional fields
   if (vef.name !== undefined && typeof vef.name !== 'string') {
@@ -440,61 +385,31 @@ function validateCrypto(crypto: unknown): VEFValidationResult {
   return { valid: true, vef: null as unknown as VaultExportFile };
 }
 
-function validateLit(lit: unknown): VEFValidationResult {
-  if (!lit || typeof lit !== 'object') {
-    return { valid: false, error: 'Missing lit', field: 'lit' };
+function validateTlock(tlock: unknown): VEFValidationResult {
+  if (!tlock || typeof tlock !== 'object') {
+    return { valid: false, error: 'Missing tlock', field: 'tlock' };
   }
 
-  const l = lit as Record<string, unknown>;
+  const t = tlock as Record<string, unknown>;
 
-  if (!SUPPORTED_LIT_NETWORKS.includes(l.network as typeof SUPPORTED_LIT_NETWORKS[number])) {
+  if (typeof t.chain_hash !== 'string' || t.chain_hash.length === 0) {
+    return { valid: false, error: 'Missing tlock chain_hash', field: 'tlock.chain_hash' };
+  }
+
+  if (!SUPPORTED_CHAIN_HASHES.includes(t.chain_hash as typeof SUPPORTED_CHAIN_HASHES[number])) {
     return {
       valid: false,
-      error: `Unsupported Lit network: ${l.network}. Supported: ${SUPPORTED_LIT_NETWORKS.join(', ')}`,
-      field: 'lit.network',
+      error: `Unsupported drand chain: ${t.chain_hash}. This vault may have been created with a different drand network.`,
+      field: 'tlock.chain_hash',
     };
   }
 
-  if (!SUPPORTED_LIT_CHAINS.includes(l.chain as typeof SUPPORTED_LIT_CHAINS[number])) {
-    return {
-      valid: false,
-      error: `Unsupported Lit chain: ${l.chain}. Supported: ${SUPPORTED_LIT_CHAINS.join(', ')}`,
-      field: 'lit.chain',
-    };
+  if (typeof t.round !== 'number' || t.round <= 0) {
+    return { valid: false, error: 'Invalid tlock round', field: 'tlock.round' };
   }
 
-  if (!Array.isArray(l.conditions) || l.conditions.length === 0) {
-    return { valid: false, error: 'Missing lit conditions', field: 'lit.conditions' };
-  }
-
-  if (typeof l.encrypted_key !== 'string' || l.encrypted_key.length === 0) {
-    return { valid: false, error: 'Missing lit encrypted_key', field: 'lit.encrypted_key' };
-  }
-
-  if (typeof l.encrypted_key_hash !== 'string' || l.encrypted_key_hash.length === 0) {
-    return { valid: false, error: 'Missing lit encrypted_key_hash', field: 'lit.encrypted_key_hash' };
-  }
-
-  return { valid: true, vef: null as unknown as VaultExportFile };
-}
-
-function validateLitValidation(litValidation: unknown): VEFValidationResult {
-  if (!litValidation || typeof litValidation !== 'object') {
-    return { valid: false, error: 'Missing lit_validation', field: 'lit_validation' };
-  }
-
-  const lv = litValidation as Record<string, unknown>;
-
-  if (!SUPPORTED_LIT_CHAINS.includes(lv.chain as typeof SUPPORTED_LIT_CHAINS[number])) {
-    return { valid: false, error: 'Invalid lit_validation.chain', field: 'lit_validation.chain' };
-  }
-
-  if (typeof lv.sdk_version !== 'string') {
-    return { valid: false, error: 'Missing lit_validation.sdk_version', field: 'lit_validation.sdk_version' };
-  }
-
-  if (!SUPPORTED_LIT_NETWORKS.includes(lv.network as typeof SUPPORTED_LIT_NETWORKS[number])) {
-    return { valid: false, error: 'Invalid lit_validation.network', field: 'lit_validation.network' };
+  if (typeof t.ciphertext !== 'string' || t.ciphertext.length === 0) {
+    return { valid: false, error: 'Missing tlock ciphertext', field: 'tlock.ciphertext' };
   }
 
   return { valid: true, vef: null as unknown as VaultExportFile };
@@ -552,8 +467,8 @@ export function vefToVaultRef(vef: VaultExportFile): VaultRef {
   return {
     id: vef.vault_id,
     unlockTime: vef.unlock_timestamp,
-    litEncryptedKey: vef.lit.encrypted_key,
-    litKeyHash: vef.lit.encrypted_key_hash,
+    tlockCiphertext: vef.tlock.ciphertext,
+    tlockRound: vef.tlock.round,
     createdAt: vef.created_at,
     name: vef.name,
     inlineData: vef.encrypted_payload,
@@ -623,8 +538,7 @@ export interface VEFBackupBundle {
  */
 export async function exportBackupBundle(
   vaults: VaultRef[],
-  appVersion: string = '0.2.0',
-  litSdkVersion: string = '7.3.1',
+  appVersion: string = '0.3.0',
 ): Promise<VEFBackupBundle> {
   const vefs: VaultExportFile[] = [];
   const errors: string[] = [];
@@ -637,7 +551,7 @@ export async function exportBackupBundle(
     }
 
     try {
-      const vef = await exportVault(vault, appVersion, litSdkVersion);
+      const vef = await exportVault(vault, appVersion);
       vefs.push(vef);
     } catch (e) {
       errors.push(`${vault.id}: ${(e as Error).message}`);
@@ -663,9 +577,8 @@ export async function exportBackupBundle(
 export async function exportBackupBundleToJson(
   vaults: VaultRef[],
   appVersion?: string,
-  litSdkVersion?: string,
 ): Promise<string> {
-  const bundle = await exportBackupBundle(vaults, appVersion, litSdkVersion);
+  const bundle = await exportBackupBundle(vaults, appVersion);
   return JSON.stringify(bundle, null, 2);
 }
 
@@ -724,6 +637,14 @@ export function parseBackupBundle(data: unknown): BackupBundleValidationResult {
     return { valid: false, error: 'Missing vef_version' };
   }
 
+  // Check for v1.0 bundles
+  if (bundle.vef_version.startsWith('1.')) {
+    return {
+      valid: false,
+      error: 'This backup was created with an older version (Lit Protocol). It cannot be imported into this version which uses drand/tlock.',
+    };
+  }
+
   if (!Array.isArray(bundle.vaults)) {
     return { valid: false, error: 'Missing vaults array' };
   }
@@ -760,7 +681,7 @@ export function parseBackupBundle(data: unknown): BackupBundleValidationResult {
 /**
  * Parse file as either single VEF or backup bundle
  */
-export type ParsedVEFFile = 
+export type ParsedVEFFile =
   | { type: 'single'; vef: VaultExportFile }
   | { type: 'bundle'; bundle: VEFBackupBundle }
   | { type: 'error'; error: string };
@@ -815,7 +736,7 @@ export async function restoreFromBundle(
 
   for (const vef of bundle.vaults) {
     const restoreResult = await restoreVaultFromVEF(vef, existingVaultIds, saveVault);
-    
+
     if (restoreResult.success) {
       if (restoreResult.skipped) {
         result.skipped++;
