@@ -8,23 +8,13 @@
     "build": "vite build",
     "preview": "vite preview",
     "stop": "lsof -ti:3000 | xargs kill -9 2>/dev/null || echo 'No server running on port 3000'",
-    "restart": "npm run stop && npm run dev",
-    "cap:sync": "npm run build && npx cap sync",
-    "cap:ios": "npm run build && npx cap sync ios && npx cap open ios",
-    "cap:android": "npm run build && npx cap sync android && npx cap open android",
-    "cap:ios:run": "npm run build && npx cap sync ios && npx cap run ios",
-    "cap:android:run": "npm run build && npx cap sync android && npx cap run android"
+    "restart": "npm run stop && npm run dev"
   },
   "dependencies": {
-    "@capacitor/android": "^7.4.4",
-    "@capacitor/core": "^7.4.4",
-    "@capacitor/filesystem": "^7.1.6",
-    "@capacitor/ios": "^7.4.4",
     "tlock-js": "^0.9.0",
     "idb-keyval": "^6.2.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.4.4",
     "@types/node": "^20",
     "terser": "^5.44.1",
     "typescript": "^5",
