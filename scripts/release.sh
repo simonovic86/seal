@@ -3,13 +3,12 @@
 # Seal Release Script
 #
 # Creates an immutable release:
-# 1. Builds the web app
+# 1. Builds the web app (PWA)
 # 2. Publishes to IPFS
 # 3. Pins on Pinata
-# 4. Configures mobile apps to load from the pinned CID
 #
 # Usage:
-#   ./scripts/release.sh [--skip-mobile]
+#   ./scripts/release.sh
 #
 # Environment:
 #   PINATA_JWT - Pinata API JWT (or set in .env.local)
@@ -36,13 +35,6 @@ echo_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
 echo_error() { echo -e "${RED}✖${NC} $1"; }
 echo_success() { echo -e "${GREEN}✔${NC} $1"; }
 
-SKIP_MOBILE=false
-for arg in "$@"; do
-    case $arg in
-        --skip-mobile) SKIP_MOBILE=true ;;
-    esac
-done
-
 # Load environment
 if [ -z "$PINATA_JWT" ] && [ -f "$PROJECT_DIR/.env.local" ]; then
     echo_info "Loading .env.local..."
@@ -68,7 +60,7 @@ echo_info "Releasing Seal v$VERSION"
 #
 # Step 1: Build
 #
-echo_step "Building Web App"
+echo_step "Building PWA"
 cd "$PROJECT_DIR"
 npm run build
 echo_success "Build complete"
@@ -127,23 +119,7 @@ else
 fi
 
 #
-# Step 5: Configure Mobile Apps
-#
-if [ "$SKIP_MOBILE" = false ]; then
-    echo_step "Configuring Mobile Apps"
-    
-    export SEAL_IPFS_URL="$GATEWAY_URL"
-    echo_info "SEAL_IPFS_URL=$SEAL_IPFS_URL"
-    
-    npm run build
-    npx cap sync
-    
-    echo_success "Mobile apps configured"
-    echo_info "Run 'npx cap open ios' or 'npx cap open android' to build"
-fi
-
-#
-# Step 6: Save Release Info
+# Step 5: Save Release Info
 #
 echo_step "Release Complete"
 
@@ -163,21 +139,17 @@ Gateway URLs:
   https://cloudflare-ipfs.com/ipfs/$RELEASE_CID/
   https://gateway.pinata.cloud/ipfs/$RELEASE_CID/
 
-Mobile Apps:
-  SEAL_IPFS_URL=https://$RELEASE_CID.ipfs.dweb.link/
-  
-  Build commands:
-    npm run cap:ios      # Open Xcode
-    npm run cap:android  # Open Android Studio
+Install as PWA:
+  iOS:     Safari → Share → "Add to Home Screen"
+  Android: Chrome → Menu → "Add to Home Screen"
 
 Verification Checklist:
   [ ] Web app loads from gateway
   [ ] Vault creation works
   [ ] Unlock behavior works
   [ ] Backup/restore works
-  [ ] iOS app loads from CID
-  [ ] Android app loads from CID
-  [ ] Network failure shows error honestly
+  [ ] PWA installs on iOS
+  [ ] PWA installs on Android
 EOF
 
 echo ""
@@ -189,7 +161,7 @@ echo "CID: $RELEASE_CID"
 echo ""
 echo "Gateway: $GATEWAY_URL"
 echo ""
-echo "Mobile:  SEAL_IPFS_URL=$GATEWAY_URL"
+echo "Install: Add to Home Screen from Safari (iOS) or Chrome (Android)"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
