@@ -221,4 +221,3 @@ class RestorePage {
 // Initialize page
 const restorePage = new RestorePage();
 restorePage.init();
-

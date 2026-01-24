@@ -31,4 +31,3 @@ export function fromBase64(base64: string): Uint8Array {
   }
   return bytes;
 }
-

@@ -20,8 +20,6 @@ import {
   Buffer,
 } from 'tlock-js';
 import type { HttpChainClient, ChainInfo } from 'tlock-js';
-import { toBase64, fromBase64 } from './encoding';
-import { withRetry } from './retry';
 
 // Cached client instance
 let chainClient: HttpChainClient | null = null;
@@ -114,23 +112,13 @@ export async function decryptKey(
   ciphertext: string,
   _roundNumber: number,
 ): Promise<Uint8Array> {
-  return withRetry(
-    async () => {
-      const client = getClient();
+  const client = getClient();
 
-      // Decrypt - this will fetch the round's randomness from drand
-      const decrypted = await timelockDecrypt(ciphertext, client);
+  // Decrypt - this will fetch the round's randomness from drand
+  const decrypted = await timelockDecrypt(ciphertext, client);
 
-      // Convert Buffer back to Uint8Array
-      return new Uint8Array(decrypted);
-    },
-    {
-      maxAttempts: 3,
-      onRetry: (attempt, error) => {
-        console.warn(`tlock decryption retry ${attempt}:`, error.message);
-      },
-    },
-  );
+  // Convert Buffer back to Uint8Array
+  return new Uint8Array(decrypted);
 }
 
 /**

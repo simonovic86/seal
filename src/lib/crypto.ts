@@ -94,23 +94,3 @@ export async function decryptToString(
   const decrypted = await decrypt(encryptedData, key);
   return new TextDecoder().decode(decrypted);
 }
-
-/**
- * Convert Uint8Array to base64 string
- */
-export function toBase64(data: Uint8Array): string {
-  return btoa(String.fromCharCode(...data));
-}
-
-/**
- * Convert base64 string to Uint8Array
- */
-export function fromBase64(base64: string): Uint8Array {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
-}
-

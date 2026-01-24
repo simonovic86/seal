@@ -16,7 +16,7 @@
 
 import { VaultRef } from './storage';
 import { resolveVaultNameForCreatedAt } from './vaultName';
-import { DRAND_CHAIN_HASH, calculateRound } from './tlock';
+import { DRAND_CHAIN_HASH } from './tlock';
 
 // =============================================================================
 // Constants

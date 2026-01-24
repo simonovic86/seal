@@ -82,4 +82,3 @@ export async function getAllVaultIds(): Promise<Set<string>> {
   const vaults = await getAllVaultRefs();
   return new Set(vaults.map((v) => v.id));
 }
-

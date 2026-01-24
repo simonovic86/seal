@@ -98,4 +98,3 @@ export const toastManager = new ToastManager();
 eventBus.on('toast:show', (message: string) => {
   toastManager.show(message);
 });
-

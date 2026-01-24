@@ -169,4 +169,3 @@ export class VaultCountdown extends Component<VaultCountdownState> {
     }
   }
 }
-

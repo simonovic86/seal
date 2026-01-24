@@ -39,31 +39,6 @@ export function getFriendlyError(error: Error): ErrorInfo {
     };
   }
 
-  // IPFS errors
-  if (msg.includes('ipfs') && msg.includes('upload')) {
-    return {
-      title: 'Upload Failed',
-      message: 'Could not upload to IPFS. Please check your internet connection and try again.',
-      recoverable: true,
-    };
-  }
-
-  if (msg.includes('fetch') && msg.includes('ipfs')) {
-    return {
-      title: 'Download Failed',
-      message: 'Could not retrieve data from IPFS. The content may be temporarily unavailable.',
-      recoverable: true,
-    };
-  }
-
-  if (msg.includes('pinata') || msg.includes('jwt')) {
-    return {
-      title: 'Configuration Error',
-      message: 'IPFS service not configured. Please set up the Pinata API key.',
-      recoverable: false,
-    };
-  }
-
   // Network errors
   if (msg.includes('network') || msg.includes('fetch') || msg.includes('timeout')) {
     return {
