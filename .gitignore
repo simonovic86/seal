@@ -48,3 +48,7 @@ next-env.d.ts
 
 # Generated release info
 RELEASE.txt
+audit-report.json
+
+# Test coverage
+coverage
