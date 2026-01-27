@@ -63,19 +63,6 @@ export function calculateRound(unlockTime: number): number {
 }
 
 /**
- * Calculate the actual unlock time for a given round
- * This is when the round's randomness becomes available
- *
- * @param round - The drand round number
- * @returns Unix timestamp in milliseconds
- */
-export function roundToTime(round: number): number {
-  // Round time = genesis + (round * period)
-  // genesis_time is in seconds, period is in seconds
-  return (CHAIN_INFO.genesis_time + round * CHAIN_INFO.period) * 1000;
-}
-
-/**
  * Encrypt a symmetric key with timelock encryption
  *
  * @param symmetricKey - The key to encrypt (Uint8Array)
@@ -127,11 +114,4 @@ export async function decryptKey(
  */
 export function isUnlockable(unlockTime: number): boolean {
   return Date.now() >= unlockTime;
-}
-
-/**
- * Get information about the drand chain being used
- */
-export function getChainInfo(): ChainInfo {
-  return CHAIN_INFO;
 }

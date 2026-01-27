@@ -20,26 +20,31 @@ interface ShareableData {
 }
 
 /**
+ * Decode URL-safe base64 from hash
+ */
+function decodeBase64FromHash(hash: string): string | null {
+  if (!hash || hash.length < 2) return null;
+
+  // Remove leading # if present and restore standard base64
+  let base64 = hash.startsWith('#') ? hash.slice(1) : hash;
+  base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+
+  // Add padding if needed
+  while (base64.length % 4) {
+    base64 += '=';
+  }
+
+  return atob(base64);
+}
+
+/**
  * Decode vault data from URL hash
  */
 export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
   try {
-    if (!hash || hash.length < 2) return null;
+    const json = decodeBase64FromHash(hash);
+    if (!json) return null;
 
-    // Remove leading # if present
-    let base64 = hash.startsWith('#') ? hash.slice(1) : hash;
-
-    // Restore URL-safe base64 to standard
-    base64 = base64
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-
-    // Add padding if needed
-    while (base64.length % 4) {
-      base64 += '=';
-    }
-
-    const json = atob(base64);
     const data: ShareableData = JSON.parse(json);
 
     // Validate required fields (v2 tlock format)
@@ -94,22 +99,9 @@ function isValidBackupVault(data: unknown): data is BackupVaultData {
  */
 export function decodeBackupFromHash(hash: string): VaultRef[] | null {
   try {
-    if (!hash || hash.length < 2) return null;
+    const json = decodeBase64FromHash(hash);
+    if (!json) return null;
 
-    // Remove leading # if present
-    let base64 = hash.startsWith('#') ? hash.slice(1) : hash;
-
-    // Restore URL-safe base64 to standard
-    base64 = base64
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-
-    // Add padding if needed
-    while (base64.length % 4) {
-      base64 += '=';
-    }
-
-    const json = atob(base64);
     const bundle: BackupBundle = JSON.parse(json);
 
     // Validate version (v2 for tlock)

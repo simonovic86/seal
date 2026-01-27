@@ -5,7 +5,7 @@
  * They never affect cryptographic semantics.
  */
 
-export function generateVaultName(date: Date = new Date()): string {
+function generateVaultName(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -14,10 +14,7 @@ export function generateVaultName(date: Date = new Date()): string {
 
 export function resolveVaultName(name?: string, date: Date = new Date()): string {
   const trimmed = name?.trim() ?? '';
-  if (trimmed.length > 0) {
-    return trimmed;
-  }
-  return generateVaultName(date);
+  return trimmed.length > 0 ? trimmed : generateVaultName(date);
 }
 
 export function resolveVaultNameForCreatedAt(name?: string, createdAt?: number): string {

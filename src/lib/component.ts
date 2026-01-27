@@ -11,20 +11,12 @@ export abstract class Component<T = any> {
   constructor(initialState: T) {
     this.state = initialState;
     this.element = this.render();
-    this.afterRender();
   }
 
   /**
    * Create and return the root DOM element
    */
   protected abstract render(): HTMLElement;
-
-  /**
-   * Called after initial render (like componentDidMount)
-   */
-  protected afterRender(): void {
-    // Override in subclasses if needed
-  }
 
   /**
    * Update component state and trigger re-render
@@ -146,10 +138,6 @@ class EventBus {
 
   emit(event: string, data?: any): void {
     this.listeners.get(event)?.forEach((callback) => callback(data));
-  }
-
-  off(event: string, callback: Function): void {
-    this.listeners.get(event)?.delete(callback);
   }
 }
 
