@@ -3,7 +3,7 @@
  * Provides state management and lifecycle methods
  */
 
-export abstract class Component<T = any> {
+export abstract class Component<T = Record<string, unknown>> {
   protected element: HTMLElement;
   protected state: T;
   private mounted = false;
@@ -98,7 +98,7 @@ export abstract class Component<T = any> {
     svg.setAttribute('stroke', 'currentColor');
     svg.setAttribute('viewBox', '0 0 24 24');
     if (classes.length) {
-      svg.className.baseVal = classes.join(' ');
+      svg.setAttribute('class', classes.join(' '));
     }
 
     const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -115,14 +115,19 @@ export abstract class Component<T = any> {
 /**
  * Event bus for component communication
  */
-class EventBus {
-  private listeners: Map<string, Set<Function>> = new Map();
+type EventCallback = (data?: unknown) => void;
 
-  on(event: string, callback: Function): () => void {
+class EventBus {
+  private listeners: Map<string, Set<EventCallback>> = new Map();
+
+  on(event: string, callback: EventCallback): () => void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event)!.add(callback);
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      eventListeners.add(callback);
+    }
 
     // Return unsubscribe function
     return () => {
@@ -130,7 +135,7 @@ class EventBus {
     };
   }
 
-  emit(event: string, data?: any): void {
+  emit(event: string, data?: unknown): void {
     this.listeners.get(event)?.forEach((callback) => callback(data));
   }
 }

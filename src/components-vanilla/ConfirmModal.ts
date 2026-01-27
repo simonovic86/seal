@@ -31,8 +31,8 @@ export class ConfirmModal extends Component<ConfirmModalState> {
       isOpen: false,
       title: options.title,
       message: options.message,
-      confirmText: options.confirmText || 'Confirm',
-      cancelText: options.cancelText || 'Cancel',
+      confirmText: options.confirmText ?? 'Confirm',
+      cancelText: options.cancelText ?? 'Cancel',
     });
 
     this.onConfirm = options.onConfirm;

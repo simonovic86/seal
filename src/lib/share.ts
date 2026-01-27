@@ -23,7 +23,7 @@ interface ShareableData {
  * Decode URL-safe base64 from hash
  */
 function decodeBase64FromHash(hash: string): string | null {
-  if (!hash || hash.length < 2) return null;
+  if (!hash || hash.length < 2) {return null;}
 
   // Remove leading # if present and restore standard base64
   let base64 = hash.startsWith('#') ? hash.slice(1) : hash;
@@ -43,9 +43,11 @@ function decodeBase64FromHash(hash: string): string | null {
 export function decodeVaultFromHash(hash: string, id: string): VaultRef | null {
   try {
     const json = decodeBase64FromHash(hash);
-    if (!json) return null;
+    if (!json) {
+      return null;
+    }
 
-    const data: ShareableData = JSON.parse(json);
+    const data = JSON.parse(json) as ShareableData;
 
     // Validate required fields (v2 tlock format)
     if (!data.c || !data.r || !data.t || !data.d) {
@@ -83,7 +85,7 @@ interface BackupBundle {
  * Validate a single vault from backup data (v2 tlock format)
  */
 function isValidBackupVault(data: unknown): data is BackupVaultData {
-  if (!data || typeof data !== 'object') return false;
+  if (!data || typeof data !== 'object') {return false;}
   const v = data as Record<string, unknown>;
   return (
     typeof v.id === 'string' &&
@@ -105,9 +107,11 @@ function isValidBackupVault(data: unknown): data is BackupVaultData {
 export function decodeBackupFromHash(hash: string): VaultRef[] | null {
   try {
     const json = decodeBase64FromHash(hash);
-    if (!json) return null;
+    if (!json) {
+      return null;
+    }
 
-    const bundle: BackupBundle = JSON.parse(json);
+    const bundle = JSON.parse(json) as BackupBundle;
 
     // Validate version (v2 for tlock)
     if (bundle.v !== 2 || !Array.isArray(bundle.vaults)) {
@@ -126,7 +130,7 @@ export function decodeBackupFromHash(hash: string): VaultRef[] | null {
         tlockCiphertext: data.c,
         tlockRound: data.r,
         unlockTime: data.t,
-        createdAt: data.a || Date.now(), // Preserve original or use now
+        createdAt: data.a ?? Date.now(), // Preserve original or use now
         name: data.n,
         inlineData: data.d,
         destroyAfterRead: data.x,

@@ -311,16 +311,20 @@ export function validateVEF(data: unknown): VEFValidationResult {
 
   // encrypted_payload
   if (typeof vef.encrypted_payload !== 'string' || vef.encrypted_payload.length === 0) {
-    return { valid: false, error: 'Missing encrypted_payload', field: 'encrypted_payload' };
+    return {
+      valid: false,
+      error: 'Missing encrypted_payload',
+      field: 'encrypted_payload',
+    };
   }
 
   // crypto
   const cryptoResult = validateCrypto(vef.crypto);
-  if (!cryptoResult.valid) return cryptoResult;
+  if (!cryptoResult.valid) {return cryptoResult;}
 
   // tlock
   const tlockResult = validateTlock(vef.tlock);
-  if (!tlockResult.valid) return tlockResult;
+  if (!tlockResult.valid) {return tlockResult;}
 
   // unlock_timestamp
   if (typeof vef.unlock_timestamp !== 'number' || vef.unlock_timestamp <= 0) {
@@ -359,7 +363,7 @@ function validateCrypto(crypto: unknown): VEFValidationResult {
   if (!SUPPORTED_ALGORITHMS.includes(c.algorithm as (typeof SUPPORTED_ALGORITHMS)[number])) {
     return {
       valid: false,
-      error: `Unsupported algorithm: ${c.algorithm}. Supported: ${SUPPORTED_ALGORITHMS.join(', ')}`,
+      error: `Unsupported algorithm: ${String(c.algorithm)}. Supported: ${SUPPORTED_ALGORITHMS.join(', ')}`,
       field: 'crypto.algorithm',
     };
   }
@@ -367,7 +371,7 @@ function validateCrypto(crypto: unknown): VEFValidationResult {
   if (!SUPPORTED_KEY_LENGTHS.includes(c.key_length as (typeof SUPPORTED_KEY_LENGTHS)[number])) {
     return {
       valid: false,
-      error: `Unsupported key_length: ${c.key_length}`,
+      error: `Unsupported key_length: ${String(c.key_length)}`,
       field: 'crypto.key_length',
     };
   }
@@ -375,7 +379,7 @@ function validateCrypto(crypto: unknown): VEFValidationResult {
   if (!SUPPORTED_IV_LENGTHS.includes(c.iv_length as (typeof SUPPORTED_IV_LENGTHS)[number])) {
     return {
       valid: false,
-      error: `Unsupported iv_length: ${c.iv_length}`,
+      error: `Unsupported iv_length: ${String(c.iv_length)}`,
       field: 'crypto.iv_length',
     };
   }
@@ -422,7 +426,7 @@ function validateTlock(tlock: unknown): VEFValidationResult {
  */
 export function parseVEF(jsonString: string): VEFValidationResult {
   try {
-    const data = JSON.parse(jsonString);
+    const data = JSON.parse(jsonString) as unknown;
     return validateVEF(data);
   } catch (e) {
     return { valid: false, error: `Invalid JSON: ${(e as Error).message}` };
@@ -443,7 +447,7 @@ export function getVaultStatus(unlockTimestamp: number): VaultStatus {
 /**
  * Create a restore preview from a VEF
  */
-export async function createRestorePreview(
+export function createRestorePreview(
   vef: VaultExportFile,
   existingVaultIds: Set<string>,
 ): Promise<VEFRestorePreview> {
@@ -668,7 +672,7 @@ export function parseBackupBundle(data: unknown): BackupBundleValidationResult {
   return {
     valid: true,
     bundle: {
-      vef_version: bundle.vef_version as string,
+      vef_version: bundle.vef_version,
       bundle_type: 'backup',
       export_timestamp: bundle.export_timestamp as number,
       app_version: bundle.app_version as string,
@@ -688,10 +692,15 @@ export type ParsedVEFFile =
 export async function parseVEFFile(file: File): Promise<ParsedVEFFile> {
   try {
     const text = await file.text();
-    const data = JSON.parse(text);
+    const data = JSON.parse(text) as unknown;
 
     // Check if it's a backup bundle
-    if (data.bundle_type === 'backup') {
+    if (
+      typeof data === 'object' &&
+      data !== null &&
+      'bundle_type' in data &&
+      data.bundle_type === 'backup'
+    ) {
       const result = parseBackupBundle(data);
       if (result.valid) {
         return { type: 'bundle', bundle: result.bundle };

@@ -34,9 +34,11 @@ class VaultPage {
   private decryptedSecret: string | null = null;
   private countdown: VaultCountdown | null = null;
 
-  async init() {
+  async init(): Promise<void> {
     const app = document.getElementById('app');
-    if (!app) return;
+    if (!app) {
+      return;
+    }
 
     // Get vault ID from URL
     const params = new URLSearchParams(window.location.search);
@@ -81,7 +83,9 @@ class VaultPage {
 
   private render(): void {
     const app = document.getElementById('app');
-    if (!app) return;
+    if (!app) {
+      return;
+    }
 
     app.innerHTML = '';
 
@@ -140,7 +144,7 @@ class VaultPage {
     const card = document.createElement('div');
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
-      <p class="${styles.message} ${styles.messageMuted}">${this.error || 'An error occurred'}</p>
+      <p class="${styles.message} ${styles.messageMuted}">${this.error ?? 'An error occurred'}</p>
     `;
 
     const tryBtn = document.createElement('button');
@@ -157,7 +161,7 @@ class VaultPage {
   }
 
   private renderLocked(main: HTMLElement): void {
-    if (!this.vault) return;
+    if (!this.vault) {return;}
 
     main.className = styles.main;
     this.addBackButton(main);
@@ -198,7 +202,7 @@ class VaultPage {
   }
 
   private renderReady(main: HTMLElement): void {
-    if (!this.vault) return;
+    if (!this.vault) {return;}
 
     main.className = styles.main;
     this.addBackButton(main);
@@ -231,7 +235,9 @@ class VaultPage {
     unlockBtn.className = 'btn-primary';
     unlockBtn.style.width = '100%';
     unlockBtn.textContent = 'Unlock';
-    unlockBtn.addEventListener('click', () => this.handleUnlockClick());
+    unlockBtn.addEventListener('click', () => {
+      void this.handleUnlockClick();
+    });
     card.appendChild(unlockBtn);
 
     main.appendChild(card);
@@ -266,7 +272,7 @@ class VaultPage {
     secretContainer.className = styles.secretContainer;
     const secretText = document.createElement('p');
     secretText.className = styles.secretText;
-    this.renderSecretContent(secretText, this.decryptedSecret || '');
+    this.renderSecretContent(secretText, this.decryptedSecret ?? '');
     secretContainer.appendChild(secretText);
     card.appendChild(secretContainer);
 
@@ -277,7 +283,7 @@ class VaultPage {
     copyBtn.className = `btn-primary ${styles.buttonFlex}`;
     copyBtn.textContent = 'Copy';
     copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(this.decryptedSecret || '');
+      void navigator.clipboard.writeText(this.decryptedSecret ?? '');
       eventBus.emit('toast:show', 'Copied');
     });
 
@@ -370,7 +376,7 @@ class VaultPage {
   }
 
   private async handleUnlockClick(): Promise<void> {
-    if (!this.vault) return;
+    if (!this.vault) {return;}
 
     if (this.vault.destroyAfterRead) {
       const confirmed = await confirm(
@@ -379,14 +385,14 @@ class VaultPage {
         'Unlock & Destroy',
         'Cancel',
       );
-      if (!confirmed) return;
+      if (!confirmed) {return;}
     }
 
     await this.handleUnlock();
   }
 
   private async handleUnlock(): Promise<void> {
-    if (!this.vault) return;
+    if (!this.vault) {return;}
 
     this.state = 'unlocking';
     this.error = null;
@@ -434,4 +440,4 @@ class VaultPage {
 
 // Initialize page
 const vaultPage = new VaultPage();
-vaultPage.init();
+void vaultPage.init();

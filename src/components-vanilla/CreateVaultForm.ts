@@ -114,7 +114,9 @@ export class CreateVaultForm extends Component<State> {
     container.appendChild(heading);
 
     const form = this.createElement('form', [styles.form]);
-    form.addEventListener('submit', (e) => this.handlePrepareVault(e));
+    form.addEventListener('submit', (e) => {
+      void this.handlePrepareVault(e);
+    });
 
     // Name input (optional)
     const nameField = this.createElement('div', [styles.field]);
@@ -282,7 +284,9 @@ export class CreateVaultForm extends Component<State> {
     armBtn.type = 'button';
     armBtn.className = `btn-primary ${styles.buttonFlex}`;
     armBtn.textContent = 'Arm Vault';
-    armBtn.addEventListener('click', () => this.handleArmVault());
+    armBtn.addEventListener('click', () => {
+      void this.handleArmVault();
+    });
     buttonRow.appendChild(armBtn);
 
     container.appendChild(buttonRow);

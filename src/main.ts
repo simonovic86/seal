@@ -31,9 +31,11 @@ class HomePage {
   private vaults: VaultRef[] = [];
   private loading = true;
 
-  async init() {
+  async init(): Promise<void> {
     const app = document.getElementById('app');
-    if (!app) return;
+    if (!app) {
+      return;
+    }
 
     // Render page structure
     app.innerHTML = '';
@@ -117,7 +119,9 @@ class HomePage {
   private renderVaultList(): void {
     const section = document.getElementById('vaults-section');
     if (!section || this.loading || this.vaults.length === 0) {
-      if (section) section.style.display = 'none';
+      if (section) {
+        section.style.display = 'none';
+      }
       return;
     }
 
@@ -143,7 +147,9 @@ class HomePage {
       </svg>
       Import
     `;
-    importBtn.addEventListener('click', () => this.handleImportVault());
+    importBtn.addEventListener('click', () => {
+      void this.handleImportVault();
+    });
 
     const backupBtn = document.createElement('button');
     backupBtn.className = styles.backupButton;
@@ -153,7 +159,9 @@ class HomePage {
       </svg>
       Backup
     `;
-    backupBtn.addEventListener('click', () => this.handleBackup());
+    backupBtn.addEventListener('click', () => {
+      void this.handleBackup();
+    });
 
     buttonGroup.appendChild(importBtn);
     buttonGroup.appendChild(backupBtn);
@@ -206,7 +214,7 @@ class HomePage {
       exportBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.handleExportVault(vault);
+        void this.handleExportVault(vault);
       });
 
       const forgetBtn = document.createElement('button');
@@ -220,7 +228,7 @@ class HomePage {
       forgetBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.handleForgetVault(vault);
+        void this.handleForgetVault(vault);
       });
 
       item.appendChild(link);
@@ -261,7 +269,7 @@ class HomePage {
       'Forget',
       'Cancel',
     );
-    if (!confirmed) return;
+    if (!confirmed) {return;}
 
     try {
       await forgetVault(vault.id);
@@ -282,7 +290,7 @@ class HomePage {
         'Continue',
         'Cancel',
       );
-      if (!confirmed) return;
+      if (!confirmed) {return;}
     }
 
     // Create hidden file input
@@ -293,7 +301,7 @@ class HomePage {
 
     input.onchange = async () => {
       const file = input.files?.[0];
-      if (!file) return;
+      if (!file) {return;}
 
       // Parse file (handles both single VEF and backup bundle)
       const parsed = await parseVEFFile(file);
@@ -358,4 +366,4 @@ class HomePage {
 
 // Initialize page
 const homePage = new HomePage();
-homePage.init();
+void homePage.init();

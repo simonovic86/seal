@@ -17,9 +17,11 @@ class RestorePage {
   private newCount = 0;
   private error: string | null = null;
 
-  async init() {
+  async init(): Promise<void> {
     const app = document.getElementById('app');
-    if (!app) return;
+    if (!app) {
+      return;
+    }
 
     await this.loadBackup();
     this.render();
@@ -56,7 +58,9 @@ class RestorePage {
 
   private render(): void {
     const app = document.getElementById('app');
-    if (!app) return;
+    if (!app) {
+      return;
+    }
 
     app.innerHTML = '';
 
@@ -95,7 +99,7 @@ class RestorePage {
     const card = document.createElement('div');
     card.className = `${styles.card} ${styles.cardCenter}`;
     card.innerHTML = `
-      <p class="${styles.message}">${this.error || 'Restore failed'}</p>
+      <p class="${styles.message}">${this.error ?? 'Restore failed'}</p>
       <a href="./" class="btn-secondary" style="display: inline-flex; padding: 0.75rem 1.5rem; text-decoration: none;">Back</a>
     `;
     main.appendChild(card);
@@ -141,7 +145,9 @@ class RestorePage {
       restoreBtn.className = 'btn-primary';
       restoreBtn.style.width = '100%';
       restoreBtn.textContent = `Restore`;
-      restoreBtn.addEventListener('click', () => this.handleRestore());
+      restoreBtn.addEventListener('click', () => {
+      void this.handleRestore();
+    });
       card.appendChild(restoreBtn);
     } else {
       const noVaults = document.createElement('div');
@@ -220,4 +226,4 @@ class RestorePage {
 
 // Initialize page
 const restorePage = new RestorePage();
-restorePage.init();
+void restorePage.init();

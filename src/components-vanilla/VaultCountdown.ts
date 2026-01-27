@@ -19,7 +19,7 @@ interface VaultCountdownState {
 
 function calculateTimeLeft(unlockTime: number): TimeLeft | null {
   const diff = unlockTime - Date.now();
-  if (diff <= 0) return null;
+  if (diff <= 0) {return null;}
 
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
@@ -125,9 +125,11 @@ export class VaultCountdown extends Component<VaultCountdownState> {
   protected update(): void {
     // Clear and re-render
     this.element.innerHTML = '';
-    const newContent = !this.state.timeLeft
-      ? this.renderReady(this.element)
-      : this.renderCountdown(this.element);
+    if (!this.state.timeLeft) {
+      this.renderReady(this.element);
+    } else {
+      this.renderCountdown(this.element);
+    }
   }
 
   protected onMount(): void {
