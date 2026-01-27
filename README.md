@@ -5,7 +5,7 @@
 Seal is a client-side web application that enables users to create encrypted vaults that remain inaccessible until a predetermined time. Built on drand's distributed randomness beacon and AES-GCM encryption, Seal provides provable time-lock guarantees without trusted third parties.
 
 [![License](https://img.shields.io/badge/license-Unlicense-blue.svg)](LICENSE)
-[![Tests](https://github.com/yourusername/seal/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/seal/actions)
+[![Tests](https://github.com/simonovic86/seal/actions/workflows/ci.yml/badge.svg)](https://github.com/simonovic86/seal/actions)
 [![Version](https://img.shields.io/badge/version-0.3.0-green.svg)](CHANGELOG.md)
 
 ---
@@ -147,7 +147,7 @@ Seal implements time-locked encryption using the [drand network](https://drand.l
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/seal.git
+git clone https://github.com/simonovic86/seal.git
 cd seal
 
 # Install dependencies

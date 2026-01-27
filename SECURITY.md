@@ -245,7 +245,7 @@ Seal is designed for:
 
 - **General Questions**: GitHub Issues
 - **Security Issues**: See "Reporting a Vulnerability" above
-- **Project Maintainer**: [YOUR-CONTACT]
+- **Project Maintainer**: Janko <simonovic86@gmail.com>
 
 ---
 

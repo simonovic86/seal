@@ -3,16 +3,16 @@
   "version": "0.3.0",
   "description": "Cryptographic time-locked encryption for the browser using drand and AES-GCM",
   "type": "module",
-  "author": "Your Name <email@example.com>",
+  "author": "Janko <simonovic86@gmail.com>",
   "license": "Unlicense",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/seal.git"
+    "url": "https://github.com/simonovic86/seal.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/seal/issues"
+    "url": "https://github.com/simonovic86/seal/issues"
   },
-  "homepage": "https://github.com/yourusername/seal#readme",
+  "homepage": "https://github.com/simonovic86/seal#readme",
   "keywords": [
     "encryption",
     "cryptography",
