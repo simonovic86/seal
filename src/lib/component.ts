@@ -35,10 +35,7 @@ export abstract class Component<T = any> {
    * Mount component to a container
    */
   mount(container: HTMLElement | string): void {
-    const target =
-      typeof container === 'string'
-        ? document.querySelector(container)
-        : container;
+    const target = typeof container === 'string' ? document.querySelector(container) : container;
 
     if (!target) {
       throw new Error('Mount target not found');
@@ -104,10 +101,7 @@ export abstract class Component<T = any> {
       svg.className.baseVal = classes.join(' ');
     }
 
-    const pathEl = document.createElementNS(
-      'http://www.w3.org/2000/svg',
-      'path',
-    );
+    const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     pathEl.setAttribute('stroke-linecap', 'round');
     pathEl.setAttribute('stroke-linejoin', 'round');
     pathEl.setAttribute('stroke-width', '1.5');

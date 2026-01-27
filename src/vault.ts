@@ -294,7 +294,7 @@ class VaultPage {
     if (this.state === 'destroyed') {
       const warning = document.createElement('p');
       warning.className = styles.warningText;
-      warning.textContent = "Save now — gone after you leave.";
+      warning.textContent = 'Save now — gone after you leave.';
       card.appendChild(warning);
     }
 
@@ -396,10 +396,7 @@ class VaultPage {
       // Get decryption key from drand via tlock
       this.progress = 'Fetching randomness from drand...';
       this.render();
-      const rawKey = await decryptKey(
-        this.vault.tlockCiphertext,
-        this.vault.tlockRound,
-      );
+      const rawKey = await decryptKey(this.vault.tlockCiphertext, this.vault.tlockRound);
 
       // Load encrypted data from URL
       this.progress = 'Loading encrypted data...';
@@ -427,9 +424,7 @@ class VaultPage {
       this.render();
     } catch (err) {
       console.error('Unlock error:', err);
-      const friendlyError = getFriendlyError(
-        err instanceof Error ? err : new Error(String(err)),
-      );
+      const friendlyError = getFriendlyError(err instanceof Error ? err : new Error(String(err)));
       this.error = friendlyError.message;
       this.state = 'error';
       this.render();

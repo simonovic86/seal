@@ -8,34 +8,34 @@
   --color-bg: #0a0a0a;
   --color-bg-top: #0a0a0a;
   --color-bg-bottom: #0a0a0a;
-  
+
   /* Colors - Foreground */
   --color-fg: #e0e0e0;
   --color-fg-muted: #808080;
   --color-fg-subtle: #5a5a5a;
   --color-fg-disabled: #404040;
-  
+
   /* Colors - Surfaces */
   --color-surface: #0a0a0a;
   --color-surface-elevated: #111111;
   --color-surface-hover: #1a1a1a;
-  
+
   /* Colors - Borders */
   --color-border: #252525;
   --color-border-hover: #333333;
   --color-border-focus: #4a9f4a;
-  
+
   /* Colors - Primary */
   --color-primary: #e0e0e0;
   --color-primary-hover: #ffffff;
   --color-primary-text: #0a0a0a;
-  
+
   /* Colors - Accent (muted green) */
   --color-accent: #4a9f4a;
   --color-accent-muted: #3d7a3d;
   --color-emerald: #4a9f4a;
   --color-red: #b54a4a;
-  
+
   /* Colors - Gray Scale */
   --zinc-50: #e0e0e0;
   --zinc-100: #c0c0c0;
@@ -47,7 +47,7 @@
   --zinc-700: #2a2a2a;
   --zinc-800: #1a1a1a;
   --zinc-900: #0f0f0f;
-  
+
   /* Spacing */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -59,43 +59,42 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
   --space-16: 4rem;
-  
+
   /* Border Radius - Minimal */
   --radius-sm: 0;
   --radius-md: 0;
   --radius-lg: 2px;
   --radius-xl: 2px;
   --radius-full: 0;
-  
+
   /* Shadows - None */
   --shadow-sm: none;
   --shadow-md: none;
   --shadow-lg: none;
   --shadow-xl: none;
-  
+
   /* Transitions - Instant */
   --transition-fast: 0ms;
   --transition-base: 0ms;
   --transition-slow: 0ms;
-  
+
   /* Font Family - Monospace only */
-  --font-sans: 'JetBrains Mono', ui-monospace, 'SF Mono', Monaco, 'Cascadia Mono', monospace;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Monaco, 'Cascadia Mono', monospace;
-  
+  --font-sans: "JetBrains Mono", ui-monospace, "SF Mono", Monaco, "Cascadia Mono", monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Monaco, "Cascadia Mono", monospace;
+
   /* Font Sizes - Reduced */
-  --text-xs: 0.6875rem;    /* 11px */
-  --text-sm: 0.8125rem;    /* 13px */
-  --text-base: 0.875rem;   /* 14px */
-  --text-lg: 1rem;         /* 16px */
-  --text-xl: 1.125rem;     /* 18px */
-  --text-2xl: 1.375rem;    /* 22px */
-  --text-3xl: 1.75rem;     /* 28px */
-  --text-4xl: 2.25rem;     /* 36px */
-  
+  --text-xs: 0.6875rem; /* 11px */
+  --text-sm: 0.8125rem; /* 13px */
+  --text-base: 0.875rem; /* 14px */
+  --text-lg: 1rem; /* 16px */
+  --text-xl: 1.125rem; /* 18px */
+  --text-2xl: 1.375rem; /* 22px */
+  --text-3xl: 1.75rem; /* 28px */
+  --text-4xl: 2.25rem; /* 36px */
+
   /* Z-Index */
   --z-base: 1;
   --z-dropdown: 10;
   --z-modal: 50;
   --z-toast: 100;
 }
-

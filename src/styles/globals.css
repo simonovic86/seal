@@ -1,5 +1,5 @@
-@import './tokens.css';
-@import './typography.css';
+@import "./tokens.css";
+@import "./typography.css";
 
 * {
   box-sizing: border-box;
@@ -61,13 +61,21 @@ body {
 
 /* No animations - keep keyframes minimal for toast visibility */
 @keyframes toast-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 1; }
-  to { opacity: 1; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .animate-toast-in {
@@ -88,4 +96,3 @@ body {
     font-size: 16px;
   }
 }
-

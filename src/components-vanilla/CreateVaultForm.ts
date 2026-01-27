@@ -24,12 +24,7 @@
  */
 
 import { Component } from '../lib/component';
-import {
-  VaultDraft,
-  createDraft,
-  armDraft,
-  wipeDraft,
-} from '../lib/vaultCreation';
+import { VaultDraft, createDraft, armDraft, wipeDraft } from '../lib/vaultCreation';
 import { VaultRef } from '../lib/storage';
 import { resolveVaultName } from '../lib/vaultName';
 import styles from '../styles/create-vault-form.module.css';
@@ -300,16 +295,10 @@ export class CreateVaultForm extends Component<State> {
 
     const steps = this.createElement('div', [styles.progressSteps]);
 
-    const stepConfigs = [
-      { label: 'Creating time lock' },
-      { label: 'Finalizing vault' },
-    ];
+    const stepConfigs = [{ label: 'Creating time lock' }, { label: 'Finalizing vault' }];
 
     stepConfigs.forEach((stepConfig) => {
-      const stepDiv = this.createElement('div', [
-        styles.progressStep,
-        styles.progressStepActive,
-      ]);
+      const stepDiv = this.createElement('div', [styles.progressStep, styles.progressStepActive]);
 
       const iconDiv = this.createElement('div', [styles.progressIcon]);
       const spinner = this.createElement('div', [styles.progressIconActive]);

@@ -9,7 +9,12 @@
 }
 
 /* Headings - Weight and spacing for hierarchy, not size */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 400;
   line-height: 1.6;
   letter-spacing: 0.02em;
@@ -57,13 +62,19 @@ small {
 }
 
 /* Code/Monospace */
-code, pre, kbd, samp {
+code,
+pre,
+kbd,
+samp {
   font-family: var(--font-mono);
   letter-spacing: 0;
 }
 
 /* All inputs use monospace */
-input, textarea, select, button {
+input,
+textarea,
+select,
+button {
   font-family: var(--font-mono);
 }
 
@@ -82,4 +93,3 @@ textarea {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-

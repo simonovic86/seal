@@ -11,11 +11,11 @@ import { VaultRef } from './storage';
 
 // Compact format to minimize URL length (v2 - tlock)
 interface ShareableData {
-  c: string;   // tlockCiphertext
-  r: number;   // tlockRound
-  t: number;   // unlockTime
-  n?: string;  // name (optional)
-  d: string;   // inlineData (base64 encrypted data)
+  c: string; // tlockCiphertext
+  r: number; // tlockRound
+  t: number; // unlockTime
+  n?: string; // name (optional)
+  d: string; // inlineData (base64 encrypted data)
   x?: boolean; // destroyAfterRead (burn after reading)
 }
 
@@ -86,11 +86,16 @@ function isValidBackupVault(data: unknown): data is BackupVaultData {
   if (!data || typeof data !== 'object') return false;
   const v = data as Record<string, unknown>;
   return (
-    typeof v.id === 'string' && v.id.length > 0 &&
-    typeof v.c === 'string' && v.c.length > 0 &&
-    typeof v.r === 'number' && v.r > 0 &&
-    typeof v.t === 'number' && v.t > 0 &&
-    typeof v.d === 'string' && v.d.length > 0
+    typeof v.id === 'string' &&
+    v.id.length > 0 &&
+    typeof v.c === 'string' &&
+    v.c.length > 0 &&
+    typeof v.r === 'number' &&
+    v.r > 0 &&
+    typeof v.t === 'number' &&
+    v.t > 0 &&
+    typeof v.d === 'string' &&
+    v.d.length > 0
   );
 }
 

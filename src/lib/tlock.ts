@@ -12,13 +12,7 @@
  * - Fully decentralized (League of Entropy)
  */
 
-import {
-  timelockEncrypt,
-  timelockDecrypt,
-  mainnetClient,
-  roundAt,
-  Buffer,
-} from 'tlock-js';
+import { timelockEncrypt, timelockDecrypt, mainnetClient, roundAt, Buffer } from 'tlock-js';
 import type { HttpChainClient, ChainInfo } from 'tlock-js';
 
 // Cached client instance
@@ -95,10 +89,7 @@ export async function encryptKeyWithTimelock(
  * @param _roundNumber - The round number (unused, ciphertext contains it)
  * @returns The decrypted symmetric key
  */
-export async function decryptKey(
-  ciphertext: string,
-  _roundNumber: number,
-): Promise<Uint8Array> {
+export async function decryptKey(ciphertext: string, _roundNumber: number): Promise<Uint8Array> {
   const client = getClient();
 
   // Decrypt - this will fetch the round's randomness from drand

@@ -26,7 +26,8 @@ export function getFriendlyError(error: Error): ErrorInfo {
   if (msg.includes('drand') || msg.includes('beacon')) {
     return {
       title: 'Network Connection Failed',
-      message: 'Could not connect to the drand randomness beacon. Please check your internet connection and try again.',
+      message:
+        'Could not connect to the drand randomness beacon. Please check your internet connection and try again.',
       recoverable: true,
     };
   }

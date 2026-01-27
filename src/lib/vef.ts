@@ -52,9 +52,9 @@ export interface VEFCrypto {
  * tlock (drand timelock) configuration
  */
 export interface VEFTlock {
-  chain_hash: string;  // drand chain identifier
-  round: number;       // target round number
-  ciphertext: string;  // tlock-encrypted symmetric key
+  chain_hash: string; // drand chain identifier
+  round: number; // target round number
+  ciphertext: string; // tlock-encrypted symmetric key
 }
 
 /**
@@ -244,10 +244,7 @@ export async function exportVault(
 /**
  * Export vault to JSON string (formatted for readability)
  */
-export async function exportVaultToJson(
-  vault: VaultRef,
-  appVersion?: string,
-): Promise<string> {
+export async function exportVaultToJson(vault: VaultRef, appVersion?: string): Promise<string> {
   const vef = await exportVault(vault, appVersion);
   return JSON.stringify(vef, null, 2);
 }
@@ -301,7 +298,8 @@ export function validateVEF(data: unknown): VEFValidationResult {
   if (vef.vef_version.startsWith('1.')) {
     return {
       valid: false,
-      error: 'This vault was created with an older version (Lit Protocol). It cannot be imported into this version which uses drand/tlock.',
+      error:
+        'This vault was created with an older version (Lit Protocol). It cannot be imported into this version which uses drand/tlock.',
       field: 'vef_version',
     };
   }
@@ -358,7 +356,7 @@ function validateCrypto(crypto: unknown): VEFValidationResult {
 
   const c = crypto as Record<string, unknown>;
 
-  if (!SUPPORTED_ALGORITHMS.includes(c.algorithm as typeof SUPPORTED_ALGORITHMS[number])) {
+  if (!SUPPORTED_ALGORITHMS.includes(c.algorithm as (typeof SUPPORTED_ALGORITHMS)[number])) {
     return {
       valid: false,
       error: `Unsupported algorithm: ${c.algorithm}. Supported: ${SUPPORTED_ALGORITHMS.join(', ')}`,
@@ -366,7 +364,7 @@ function validateCrypto(crypto: unknown): VEFValidationResult {
     };
   }
 
-  if (!SUPPORTED_KEY_LENGTHS.includes(c.key_length as typeof SUPPORTED_KEY_LENGTHS[number])) {
+  if (!SUPPORTED_KEY_LENGTHS.includes(c.key_length as (typeof SUPPORTED_KEY_LENGTHS)[number])) {
     return {
       valid: false,
       error: `Unsupported key_length: ${c.key_length}`,
@@ -374,7 +372,7 @@ function validateCrypto(crypto: unknown): VEFValidationResult {
     };
   }
 
-  if (!SUPPORTED_IV_LENGTHS.includes(c.iv_length as typeof SUPPORTED_IV_LENGTHS[number])) {
+  if (!SUPPORTED_IV_LENGTHS.includes(c.iv_length as (typeof SUPPORTED_IV_LENGTHS)[number])) {
     return {
       valid: false,
       error: `Unsupported iv_length: ${c.iv_length}`,
@@ -396,7 +394,7 @@ function validateTlock(tlock: unknown): VEFValidationResult {
     return { valid: false, error: 'Missing tlock chain_hash', field: 'tlock.chain_hash' };
   }
 
-  if (!SUPPORTED_CHAIN_HASHES.includes(t.chain_hash as typeof SUPPORTED_CHAIN_HASHES[number])) {
+  if (!SUPPORTED_CHAIN_HASHES.includes(t.chain_hash as (typeof SUPPORTED_CHAIN_HASHES)[number])) {
     return {
       valid: false,
       error: `Unsupported drand chain: ${t.chain_hash}. This vault may have been created with a different drand network.`,
@@ -641,7 +639,8 @@ export function parseBackupBundle(data: unknown): BackupBundleValidationResult {
   if (bundle.vef_version.startsWith('1.')) {
     return {
       valid: false,
-      error: 'This backup was created with an older version (Lit Protocol). It cannot be imported into this version which uses drand/tlock.',
+      error:
+        'This backup was created with an older version (Lit Protocol). It cannot be imported into this version which uses drand/tlock.',
     };
   }
 

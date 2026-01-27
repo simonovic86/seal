@@ -7,7 +7,13 @@ import './styles/shared.css';
 import './components-vanilla/Toast'; // Side-effect: registers toast event listener
 import { CreateVaultForm } from './components-vanilla/CreateVaultForm';
 import { confirm } from './components-vanilla/ConfirmModal';
-import { getAllVaultRefs, getAllVaultIds, saveVaultRef, forgetVault, VaultRef } from './lib/storage';
+import {
+  getAllVaultRefs,
+  getAllVaultIds,
+  saveVaultRef,
+  forgetVault,
+  VaultRef,
+} from './lib/storage';
 import { isUnlockable } from './lib/tlock';
 import { eventBus } from './lib/component';
 import { resolveVaultNameForCreatedAt } from './lib/vaultName';
@@ -302,11 +308,7 @@ class HomePage {
 
       if (parsed.type === 'bundle') {
         // Handle backup bundle (multiple vaults)
-        const result = await restoreFromBundle(
-          parsed.bundle,
-          existingIds,
-          saveVaultRef,
-        );
+        const result = await restoreFromBundle(parsed.bundle, existingIds, saveVaultRef);
 
         if (result.restored > 0) {
           await this.loadVaults();
@@ -337,11 +339,7 @@ class HomePage {
           return;
         }
 
-        const restoreResult = await restoreVaultFromVEF(
-          parsed.vef,
-          existingIds,
-          saveVaultRef,
-        );
+        const restoreResult = await restoreVaultFromVEF(parsed.vef, existingIds, saveVaultRef);
 
         if (restoreResult.success && !restoreResult.skipped) {
           await this.loadVaults();

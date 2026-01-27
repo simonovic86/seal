@@ -34,33 +34,22 @@ export async function importKey(raw: Uint8Array): Promise<CryptoKey> {
   const keyBuffer = new ArrayBuffer(raw.byteLength);
   new Uint8Array(keyBuffer).set(raw);
 
-  return crypto.subtle.importKey(
-    'raw',
-    keyBuffer,
-    { name: ALGORITHM, length: KEY_LENGTH },
-    false,
-    ['encrypt', 'decrypt'],
-  );
+  return crypto.subtle.importKey('raw', keyBuffer, { name: ALGORITHM, length: KEY_LENGTH }, false, [
+    'encrypt',
+    'decrypt',
+  ]);
 }
 
 /**
  * Encrypt data with AES-256-GCM
  * Returns ciphertext with IV prepended (IV || ciphertext)
  */
-export async function encrypt(
-  data: ArrayBuffer | string,
-  key: CryptoKey,
-): Promise<Uint8Array> {
+export async function encrypt(data: ArrayBuffer | string, key: CryptoKey): Promise<Uint8Array> {
   const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
 
-  const plaintext =
-    typeof data === 'string' ? new TextEncoder().encode(data) : data;
+  const plaintext = typeof data === 'string' ? new TextEncoder().encode(data) : data;
 
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: ALGORITHM, iv },
-    key,
-    plaintext,
-  );
+  const ciphertext = await crypto.subtle.encrypt({ name: ALGORITHM, iv }, key, plaintext);
 
   // Prepend IV to ciphertext
   const result = new Uint8Array(iv.length + ciphertext.byteLength);
@@ -74,10 +63,7 @@ export async function encrypt(
  * Decrypt data encrypted with AES-256-GCM
  * Expects IV prepended to ciphertext (IV || ciphertext)
  */
-export async function decrypt(
-  encryptedData: Uint8Array,
-  key: CryptoKey,
-): Promise<ArrayBuffer> {
+export async function decrypt(encryptedData: Uint8Array, key: CryptoKey): Promise<ArrayBuffer> {
   const iv = encryptedData.slice(0, IV_LENGTH);
   const ciphertext = encryptedData.slice(IV_LENGTH);
 
@@ -87,10 +73,7 @@ export async function decrypt(
 /**
  * Decrypt to string (for text secrets)
  */
-export async function decryptToString(
-  encryptedData: Uint8Array,
-  key: CryptoKey,
-): Promise<string> {
+export async function decryptToString(encryptedData: Uint8Array, key: CryptoKey): Promise<string> {
   const decrypted = await decrypt(encryptedData, key);
   return new TextDecoder().decode(decrypted);
 }

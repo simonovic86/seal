@@ -153,10 +153,7 @@ export async function armDraft(draft: VaultDraft): Promise<VaultRef> {
   const resolvedName = resolveVaultName(draft.name);
 
   // Create time-lock with tlock (drand)
-  const { ciphertext, roundNumber } = await encryptKeyWithTimelock(
-    draft.rawKey,
-    draft.unlockTime,
-  );
+  const { ciphertext, roundNumber } = await encryptKeyWithTimelock(draft.rawKey, draft.unlockTime);
 
   // Build vault reference
   const vault: VaultRef = {

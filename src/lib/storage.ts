@@ -8,11 +8,11 @@ import { get, set, del, keys } from 'idb-keyval';
 export interface VaultRef {
   id: string;
   unlockTime: number;
-  tlockCiphertext: string;  // tlock-encrypted symmetric key
-  tlockRound: number;       // drand round number for decryption
+  tlockCiphertext: string; // tlock-encrypted symmetric key
+  tlockRound: number; // drand round number for decryption
   createdAt: number;
   name?: string;
-  inlineData: string;  // Base64 encrypted data stored in URL
+  inlineData: string; // Base64 encrypted data stored in URL
   destroyAfterRead?: boolean;
 }
 
@@ -41,14 +41,14 @@ export async function deleteVaultRef(id: string): Promise<void> {
 
 /**
  * Forget a vault locally.
- * 
+ *
  * Removes the vault's metadata from this browser's local storage.
  * This is local hygiene only — it does NOT:
  * - Invalidate URLs
  * - Affect encrypted payloads
  * - Delete data from IPFS
  * - Impact backups or other devices
- * 
+ *
  * Idempotent: safe to call multiple times.
  */
 export async function forgetVault(id: string): Promise<void> {

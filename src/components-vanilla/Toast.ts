@@ -25,10 +25,7 @@ export class Toast extends Component<ToastState> {
     const content = this.createElement('div', [styles.content]);
 
     // Check icon
-    const icon = this.createSVG(
-      'M5 13l4 4L19 7',
-      [styles.icon],
-    );
+    const icon = this.createSVG('M5 13l4 4L19 7', [styles.icon]);
     icon.setAttribute('stroke-width', '2');
 
     content.appendChild(icon);

@@ -19,16 +19,14 @@ export class ConfirmModal extends Component<ConfirmModalState> {
   private onCancel: () => void;
   private handleKeydown: (e: KeyboardEvent) => void;
 
-  constructor(
-    options: {
-      title: string;
-      message: string;
-      confirmText?: string;
-      cancelText?: string;
-      onConfirm: () => void;
-      onCancel: () => void;
-    },
-  ) {
+  constructor(options: {
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+  }) {
     super({
       isOpen: false,
       title: options.title,
@@ -84,17 +82,11 @@ export class ConfirmModal extends Component<ConfirmModalState> {
     // Actions
     const actions = this.createElement('div', [styles.actions]);
 
-    const cancelBtn = this.createElement('button', [
-      'btn-secondary',
-      styles.cancelButton,
-    ]);
+    const cancelBtn = this.createElement('button', ['btn-secondary', styles.cancelButton]);
     cancelBtn.textContent = this.state.cancelText;
     cancelBtn.addEventListener('click', () => this.cancel());
 
-    const confirmBtn = this.createElement('button', [
-      'btn-primary',
-      styles.confirmButton,
-    ]);
+    const confirmBtn = this.createElement('button', ['btn-primary', styles.confirmButton]);
     confirmBtn.textContent = this.state.confirmText;
     confirmBtn.addEventListener('click', () => this.confirm());
 
