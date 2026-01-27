@@ -19,7 +19,9 @@ interface VaultCountdownState {
 
 function calculateTimeLeft(unlockTime: number): TimeLeft | null {
   const diff = unlockTime - Date.now();
-  if (diff <= 0) {return null;}
+  if (diff <= 0) {
+    return null;
+  }
 
   return {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),

@@ -146,8 +146,8 @@ class RestorePage {
       restoreBtn.style.width = '100%';
       restoreBtn.textContent = `Restore`;
       restoreBtn.addEventListener('click', () => {
-      void this.handleRestore();
-    });
+        void this.handleRestore();
+      });
       card.appendChild(restoreBtn);
     } else {
       const noVaults = document.createElement('div');

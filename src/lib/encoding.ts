@@ -19,7 +19,9 @@ export function toBase64(data: Uint8Array): string {
 export function fromBase64(base64: string): Uint8Array {
   // Restore standard base64
   let b64 = base64.replace(/-/g, '+').replace(/_/g, '/');
-  while (b64.length % 4) {b64 += '=';}
+  while (b64.length % 4) {
+    b64 += '=';
+  }
 
   const binary = atob(b64);
   const bytes = new Uint8Array(binary.length);

@@ -320,11 +320,15 @@ export function validateVEF(data: unknown): VEFValidationResult {
 
   // crypto
   const cryptoResult = validateCrypto(vef.crypto);
-  if (!cryptoResult.valid) {return cryptoResult;}
+  if (!cryptoResult.valid) {
+    return cryptoResult;
+  }
 
   // tlock
   const tlockResult = validateTlock(vef.tlock);
-  if (!tlockResult.valid) {return tlockResult;}
+  if (!tlockResult.valid) {
+    return tlockResult;
+  }
 
   // unlock_timestamp
   if (typeof vef.unlock_timestamp !== 'number' || vef.unlock_timestamp <= 0) {

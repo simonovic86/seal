@@ -161,7 +161,9 @@ class VaultPage {
   }
 
   private renderLocked(main: HTMLElement): void {
-    if (!this.vault) {return;}
+    if (!this.vault) {
+      return;
+    }
 
     main.className = styles.main;
     this.addBackButton(main);
@@ -202,7 +204,9 @@ class VaultPage {
   }
 
   private renderReady(main: HTMLElement): void {
-    if (!this.vault) {return;}
+    if (!this.vault) {
+      return;
+    }
 
     main.className = styles.main;
     this.addBackButton(main);
@@ -376,7 +380,9 @@ class VaultPage {
   }
 
   private async handleUnlockClick(): Promise<void> {
-    if (!this.vault) {return;}
+    if (!this.vault) {
+      return;
+    }
 
     if (this.vault.destroyAfterRead) {
       const confirmed = await confirm(
@@ -385,14 +391,18 @@ class VaultPage {
         'Unlock & Destroy',
         'Cancel',
       );
-      if (!confirmed) {return;}
+      if (!confirmed) {
+        return;
+      }
     }
 
     await this.handleUnlock();
   }
 
   private async handleUnlock(): Promise<void> {
-    if (!this.vault) {return;}
+    if (!this.vault) {
+      return;
+    }
 
     this.state = 'unlocking';
     this.error = null;

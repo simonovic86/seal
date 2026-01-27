@@ -23,7 +23,9 @@ interface ShareableData {
  * Decode URL-safe base64 from hash
  */
 function decodeBase64FromHash(hash: string): string | null {
-  if (!hash || hash.length < 2) {return null;}
+  if (!hash || hash.length < 2) {
+    return null;
+  }
 
   // Remove leading # if present and restore standard base64
   let base64 = hash.startsWith('#') ? hash.slice(1) : hash;
@@ -85,7 +87,9 @@ interface BackupBundle {
  * Validate a single vault from backup data (v2 tlock format)
  */
 function isValidBackupVault(data: unknown): data is BackupVaultData {
-  if (!data || typeof data !== 'object') {return false;}
+  if (!data || typeof data !== 'object') {
+    return false;
+  }
   const v = data as Record<string, unknown>;
   return (
     typeof v.id === 'string' &&

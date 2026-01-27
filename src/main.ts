@@ -269,7 +269,9 @@ class HomePage {
       'Forget',
       'Cancel',
     );
-    if (!confirmed) {return;}
+    if (!confirmed) {
+      return;
+    }
 
     try {
       await forgetVault(vault.id);
@@ -290,7 +292,9 @@ class HomePage {
         'Continue',
         'Cancel',
       );
-      if (!confirmed) {return;}
+      if (!confirmed) {
+        return;
+      }
     }
 
     // Create hidden file input
@@ -301,7 +305,9 @@ class HomePage {
 
     input.onchange = async () => {
       const file = input.files?.[0];
-      if (!file) {return;}
+      if (!file) {
+        return;
+      }
 
       // Parse file (handles both single VEF and backup bundle)
       const parsed = await parseVEFFile(file);
