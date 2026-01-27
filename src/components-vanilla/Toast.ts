@@ -92,6 +92,6 @@ class ToastManager {
 export const toastManager = new ToastManager();
 
 // Global event listener for toast events
-eventBus.on('toast:show', (message: string) => {
-  toastManager.show(message);
+eventBus.on('toast:show', (data: unknown) => {
+  toastManager.show(String(data));
 });

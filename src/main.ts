@@ -340,7 +340,7 @@ class HomePage {
         eventBus.emit('toast:show', parts.join(', ') || 'No vaults to restore');
       } else {
         // Handle single VEF
-        const preview = await createRestorePreview(parsed.vef, existingIds);
+        const preview = createRestorePreview(parsed.vef, existingIds);
 
         if (preview.already_exists) {
           eventBus.emit('toast:show', 'Vault already exists');

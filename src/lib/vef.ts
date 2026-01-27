@@ -450,7 +450,7 @@ export function getVaultStatus(unlockTimestamp: number): VaultStatus {
 export function createRestorePreview(
   vef: VaultExportFile,
   existingVaultIds: Set<string>,
-): Promise<VEFRestorePreview> {
+): VEFRestorePreview {
   return {
     vault_id: vef.vault_id,
     name: resolveVaultNameForCreatedAt(vef.name, vef.created_at),
