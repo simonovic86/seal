@@ -80,6 +80,23 @@
   box-sizing: border-box;
 }
 
+/* Ensure date/time inputs are visible on all platforms */
+.input[type="date"],
+.input[type="time"] {
+  min-height: 2.75rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Show calendar/clock icon on webkit */
+.input[type="date"]::-webkit-calendar-picker-indicator,
+.input[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  cursor: pointer;
+  filter: invert(0.7);
+}
+
 @media (max-width: 480px) {
   .input {
     padding: 1rem;
